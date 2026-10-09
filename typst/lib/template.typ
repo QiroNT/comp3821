@@ -2,9 +2,16 @@
 #import "@preview/finite:0.5.1" as finite
 #import "@preview/fletcher:0.5.8" as fletcher: diagram, edge, node
 #import "@preview/cetz:0.5.2" as cetz
+#import "@preview/cetz-plot:0.1.4": plot
 #import theoretic.presets.basic: *
 
 #import "./enum-label.typ" as el: enum-label, wrapped-enum-numbering
+#import "./pmod.typ": pmod
+
+#let pc = citation => {
+  set cite(form: "prose")
+  citation
+}
 
 #let solution = theorem.with(
   variant: "proof",
