@@ -5,6 +5,20 @@
 Hi! This is a small demo section to show the usage of some library functions. These are mostly pulled from my past
 assignments.
 
+== Compiling
+
+To open a preview in browser (requires `tinymist`):\
+`tinymist preview --partial-rendering=true --invert-colors=auto ./typst/final-report.typ`
+
+To compile to PDF:\
+`typst compile ./typst/final-report.typ`
+
+To convert a `.bib` reference to yaml (requires `hayagriva`):\
+`hayagriva some.bib`
+
+Setup tinymist and configure it as your formatter on save! It will save you a lot of time. It has auto equation/table
+aligning, and usual stuffs like auto indentation.
+
 == Referencing
 
 #pc[@alonso-eoap] show that first year university students who finished a peer-mentoring program has 26% decrease in
