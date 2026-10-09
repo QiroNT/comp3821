@@ -1,4 +1,6 @@
-#import "../lib/template.typ": automaton, cetz, claim, enum-label, finite, pc, plot, pmod, proof, solution, template
+#import "../lib/template.typ": (
+  automaton, cetz, claim, diagram, edge, enum-label, finite, node, pc, plot, pmod, proof, solution, template,
+)
 
 = Demos
 
@@ -148,6 +150,22 @@ which implies the modulo $8$ of the perfect squares must be $3$ consecutive inte
   content("c-d", [Cat D])
   content("c-d.south-east", [Cap $q_D$], anchor: "south-east", padding: .1)
 })
+
+#align(center)[
+  #diagram(node-stroke: .1em, {
+    node((0, 0), $c_1$)
+    edge((1, 0.5), "->")
+    node((0, 1), $c_2$)
+    edge("->")
+    node((1, 0.5), $c_3$)
+    edge("->")
+    edge((2, 1), "->")
+    node((2, 0), $c_4$)
+    node((2, 1), $c_5$)
+    edge("->")
+    node((3, 1), $c_6$)
+  })
+]
 
 #figure(
   caption: [The graphs of the implicitly defined curves. From left to right: \
