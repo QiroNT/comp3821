@@ -16,7 +16,7 @@
 #let solution = theorem.with(
   variant: "proof",
   kind: "solution",
-  supplement: [S#text("OLUTION", 9pt)],
+  supplement: smallcaps("Solution"),
   number: none,
   suffix: sym.lozenge,
   options: (
@@ -33,7 +33,7 @@
   #show ref: theoretic.show-ref
   #show ref: el.show-ref
 
-  #set document(title: title, author: "Edmond Cheng, Lachlan Martin, Chino ZHOU")
+  #set document(title: title, author: "Edmond Cheng, Lachlan Martin, Chino Zhou")
   #set page(
     paper: "a4",
     numbering: "1",
