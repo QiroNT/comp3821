@@ -1,4 +1,4 @@
-import type { Algorithm, Request } from 'framework'
+import type { Algorithm } from 'framework'
 import { fn, rpc } from 'framework'
 
 /* eslint prefer-arrow-callback: "off" */
@@ -48,9 +48,9 @@ const newCoordinator = rpc()(function ({ sender }) {
 /**
  * Coordinator uses this procedure to distribute the new task description.
  */
-const ready = rpc()(function ({ sender }, description: unknown) {
+const ready = rpc()(function ({ sender }) {
   if (this.coordinator === sender && this.state === 'reorganization') {
-    this.description = description
+    this.assertLeader(sender)
     this.state = 'normal'
   }
 })
@@ -95,13 +95,14 @@ const election = fn(async function () {
   // (`this.description` probably contains a copy of `up`.) If during the
   // reorganization a node in `up` fails, the reorganization can be stopped
   // and a new reorganization started.
-  for (const { status } of await this.callAll(up, ready, this.description)) {
+  for (const { status } of await this.callAll(up, ready)) {
     if (status === 'timeout') {
       await election.call(this)
       return
     }
   }
 
+  this.assertLeader(this)
   this.state = 'normal'
 })
 

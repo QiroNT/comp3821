@@ -21,6 +21,8 @@ Some parts of the local state are maintained by the framework itself. They are a
   duration of the election.
 - `this.abortOutstanding` is a function that when called, cancels all other functions on the node currently waiting on
   an `await` point.
+- `this.assertLeader` is a function which signals to the framework that the current node thinks this node is the leader.
+  This is used as a stop condition, when all nodes have called `assertLeader` with the same leader node.
 - `this.callAll` is a utility function that broadcasts an RPC to an array of nodes.
 
 === The node interface
