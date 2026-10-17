@@ -10,12 +10,12 @@ assignments.
 == Compiling
 
 To open a preview in browser (requires `tinymist`):\
-`tinymist preview --partial-rendering=true --invert-colors=auto ./typst/final-report.typ`
+`tinymist preview --partial-rendering=true --invert-colors=auto --root=. ./typst/final-report.typ`
 
 To compile to PDF:\
-`typst compile ./typst/final-report.typ`
+`typst compile --root=. ./typst/final-report.typ`
 
-To convert a `.bib` reference to yaml (requires `hayagriva`):\
+To convert a `.bib` reference to yaml for editing (requires `hayagriva`):\
 `hayagriva some.bib`
 
 Setup tinymist and configure it as your formatter on save! It will save you a lot of time. It has auto equation/table

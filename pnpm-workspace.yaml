@@ -1,0 +1,11 @@
+packages:
+  - packages/*
+
+catalogMode: prefer
+catalogPrune: true
+catalog:
+  '@antfu/eslint-config': ^9.5.1
+  eslint: ^10.13.0
+  typescript: ^6.0.3
+minimumReleaseAgeExclude:
+  - eslint@10.13.0
