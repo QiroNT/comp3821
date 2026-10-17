@@ -61,14 +61,10 @@ const ready = rpc()(function ({ sender }, description: unknown) {
 const election = fn(async function () {
   // First step is to check if any higher priority nodes are up. If any such
   // node is up, quit.
-  for (const node of this.network.filter(node => node.id > this.id)) {
-    const { status } = await node.call(areYouThere)
-    if (status === 'timeout') {
-      continue
-    }
-    else {
+  const higher = this.network.filter(node => node.id > this.id)
+  for (const { status } of await this.callAll(higher, areYouThere)) {
+    if (status !== 'timeout')
       return
-    }
   }
 
   // Next, halt all lower priority nodes, starting with this node.
@@ -76,22 +72,17 @@ const election = fn(async function () {
   this.state = 'election'
   this.haltedBy = this
   const up = []
-  for (const node of this.network.filter(node => node.id < this.id)) {
-    const { status } = await node.call(halt)
-    if (status === 'timeout') {
-      continue
-    }
-    else {
-      up.push(node)
-    }
+  const lower = this.network.filter(node => node.id < this.id)
+  for (const { target, status } of await this.callAll(lower, halt)) {
+    if (status !== 'timeout')
+      up.push(target)
   }
 
   // Now the node has reached its "election point." Next step is to inform
   // nodes of new coordinator.
   this.coordinator = this
   this.state = 'reorganization'
-  for (const node of up) {
-    const { status } = await node.call(newCoordinator)
+  for (const { status } of await this.callAll(up, newCoordinator)) {
     if (status === 'timeout') {
       // The node failed. The simplest thing is to restart.
       await election.call(this)
@@ -104,8 +95,7 @@ const election = fn(async function () {
   // (`this.description` probably contains a copy of `up`.) If during the
   // reorganization a node in `up` fails, the reorganization can be stopped
   // and a new reorganization started.
-  for (const node of up) {
-    const { status } = await node.call(ready, this.description)
+  for (const { status } of await this.callAll(up, ready, this.description)) {
     if (status === 'timeout') {
       await election.call(this)
       return

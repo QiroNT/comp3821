@@ -21,6 +21,7 @@ Some parts of the local state are maintained by the framework itself. They are a
   duration of the election.
 - `this.abortOutstanding` is a function that when called, cancels all other functions on the node currently waiting on
   an `await` point.
+- `this.callAll` is a utility function that broadcasts an RPC to an array of nodes.
 
 === The node interface
 
@@ -29,7 +30,7 @@ The set of `node`s contained in `this.network` are provided with these functions
 - `node.id` is the node's ID.
 - `node.call(name, ...parameters)`, which sends an RPC to the node when called.
 
-  The function is asynchronous, and returns an object containing `status` and `response`.
+  The function is asynchronous, and returns an object containing `target`, `status` and `response`.
 
   When the `status` is `'timeout'`, the RPC call has timed out and no reply has been received. Otherwise, the `response`
   contains the message sent by `reply()`.

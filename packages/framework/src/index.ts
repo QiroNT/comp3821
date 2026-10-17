@@ -12,12 +12,14 @@ type Rpc<A extends unknown[], R> = (
 ) => Promise<void> | void
 
 type RpcResponse<T> = {
+  target: NodeRef
+} & ({
   status: 'timeout'
   response?: undefined
 } | {
   status: 'ok'
   response: T
-}
+})
 
 export function rpc<R = undefined>() {
   return <A extends unknown[]>(f: Rpc<A, R>) => f
@@ -35,14 +37,17 @@ export type NodeThis = Record<string, any> & {
   id: number
   network: [NodeRef]
   abortOutstanding: () => void
+  callAll: <const N extends readonly NodeRef[], A extends unknown[], R>(
+    nodes: N,
+    rpc: Rpc<A, R>,
+    ...args: A
+  ) => Promise<{ -readonly [K in keyof N]: RpcResponse<R> }>
 }
 
 export type NodeRef = Record<string, any> & {
   id: number
-  call: <
-    A extends unknown[],
-    R,
-  >(rpc: Rpc<A, R>,
+  call: <A extends unknown[], R>(
+    rpc: Rpc<A, R>,
     ...args: A
   ) => Promise<RpcResponse<R>>
 }
