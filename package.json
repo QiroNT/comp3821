@@ -3,9 +3,13 @@
   "workspaces": [
     "packages/*"
   ],
+  "scripts": {
+    "test": "vitest"
+  },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:",
     "eslint": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

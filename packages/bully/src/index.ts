@@ -8,14 +8,14 @@ import { fn, rpc } from 'framework'
  * This procedure is used by remote nodes to discover if the node is operating.
  * Nothing is actually done at the node.
  */
-const areYouThere = rpc()(async function ({ reply }) {
+const areYouThere = rpc()(async function areYouThere({ reply }) {
   await reply()
 })
 
 /**
  * This procedure is called by coordinators to discover the state of a node.
  */
-const areYouNormal = rpc<boolean>()(async function ({ reply }) {
+const areYouNormal = rpc<boolean>()(async function areYouNormal({ reply }) {
   if (this.state === 'normal') {
     await reply(true)
   }
@@ -28,37 +28,40 @@ const areYouNormal = rpc<boolean>()(async function ({ reply }) {
  * When a node receives this message, it means that the sender node is trying
  * to become coordinator.
  */
-const halt = rpc()(function ({ sender }) {
+const halt = rpc()(async function halt({ sender, reply }) {
   this.state = 'election'
   this.haltedBy = sender
   this.abortOutstanding()
+  await reply()
 })
 
 /**
  * The sender node uses this procedure to inform the receiver node that the
  * sender has become coordinator.
  */
-const newCoordinator = rpc()(function ({ sender }) {
+const newCoordinator = rpc()(async function newCoordinator({ sender, reply }) {
   if (this.haltedBy === sender && this.state === 'election') {
     this.coordinator = sender
     this.state = 'reorganization'
   }
+  await reply()
 })
 
 /**
  * Coordinator uses this procedure to distribute the new task description.
  */
-const ready = rpc()(function ({ sender }) {
+const ready = rpc()(async function ready({ sender, reply }) {
   if (this.coordinator === sender && this.state === 'reorganization') {
     this.assertLeader(sender)
     this.state = 'normal'
   }
+  await reply()
 })
 
 /**
  * By executing this procedure, the node attempts to become coordinator.
  */
-const election = fn(async function () {
+const election = fn(async function election() {
   // First step is to check if any higher priority nodes are up. If any such
   // node is up, quit.
   const higher = this.network.filter(node => node.id > this.id)
@@ -110,7 +113,7 @@ const election = fn(async function () {
  * This procedure is automatically called by the operating system when a node
  * starts up after a failure.
  */
-const onRecovery = fn(async function () {
+const onRecovery = fn(async function onRecovery() {
   delete this.haltedBy
   await election.call(this)
 })
@@ -118,7 +121,7 @@ const onRecovery = fn(async function () {
 /**
  * This procedure is called periodically by the operating system.
  */
-const onCheck = fn(async function () {
+const onCheck = fn(async function onCheck() {
   if (this.state === 'normal' && this.coordinator === this) {
     // I am coordinator. Check if everyone else is normal.
     for (const node of this.network) {
@@ -138,7 +141,7 @@ const onCheck = fn(async function () {
  * This procedure is called automatically when the node has not heard from the
  * coordinator in a "long" time.
  */
-const onTimeout = fn(async function () {
+const onTimeout = fn(async function onTimeout() {
   if (this.state === 'normal' || this.state === 'reorganization') {
     // Check if coordinator is up.
     const { status } = await this.coordinator.call(areYouThere)
