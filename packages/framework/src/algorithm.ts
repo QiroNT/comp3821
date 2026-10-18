@@ -1,17 +1,19 @@
+import type { MaybePromise } from './util'
+
 export interface Request<R> {
   sender: NodeRef
   reply: [R] extends [undefined]
-    ? () => Promise<RpcResponse<void>>
-    : (reply: R) => Promise<RpcResponse<void>>
+    ? (reply?: R) => Promise<RpcResponse<undefined>>
+    : (reply: R) => Promise<RpcResponse<undefined>>
 }
 
-type Rpc<A extends unknown[], R> = (
+export type Rpc<A extends unknown[], R> = (
   this: NodeThis,
   context: Request<R>,
   ...args: A
-) => Promise<void> | void
+) => MaybePromise<void>
 
-type RpcResponse<T> = {
+export type RpcResponse<T> = {
   target: NodeRef
 } & ({
   status: 'timeout'
@@ -35,15 +37,15 @@ export function fn<
 
 export type NodeThis = Record<string, any> & {
   id: number
-  network: [NodeRef]
+  network: NodeRef[]
   abortOutstanding: () => void
   assertLeader: (leader?: NodeRef | NodeThis) => void
 
-  callAll: <const N extends readonly NodeRef[], A extends unknown[], R>(
-    nodes: N,
+  callAll: <A extends unknown[], R>(
+    nodes: NodeRef[],
     rpc: Rpc<A, R>,
     ...args: A
-  ) => Promise<{ -readonly [K in keyof N]: RpcResponse<R> }>
+  ) => Promise<RpcResponse<R>[]>
 }
 
 export type NodeRef = Record<string, any> & {

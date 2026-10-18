@@ -10,7 +10,7 @@ export interface NetworkNode {
 }
 
 export class Network {
-  private nodes: NetworkNode[] = []
+  public nodes: NetworkNode[] = []
   constructor() { }
 
   addNode(): NetworkNode {
