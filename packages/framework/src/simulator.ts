@@ -159,7 +159,7 @@ export class Simulator {
         note(res.status)
       })
       .catch((error) => {
-        note('aborted')
+        note(error instanceof AbortError ? 'aborted' : 'errored')
         this.noteError(from.id, error)
       })
 

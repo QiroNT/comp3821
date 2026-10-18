@@ -1,12 +1,18 @@
+catalogMode: prefer
+catalogPrune: true
+
+minimumReleaseAgeExcludePrune: true
+minimumReleaseAgeExclude:
+  - eslint@10.13.0
+
+trustPolicy: no-downgrade
+shellEmulator: true
+
 packages:
   - packages/*
 
-catalogMode: prefer
-catalogPrune: true
 catalog:
   '@antfu/eslint-config': ^9.5.1
   eslint: ^10.13.0
   typescript: ^6.0.3
   vitest: ^5.0.5
-minimumReleaseAgeExclude:
-  - eslint@10.13.0
