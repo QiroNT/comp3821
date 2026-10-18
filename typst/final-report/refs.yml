@@ -23,3 +23,14 @@ alonso-eoap:
       location: Madrid
     issue: 1
     volume: 30
+
+# Real Sources
+roohitavaf-paxos:
+  type: article
+  title: The Paxos algorithm, when presented in plain English, is very simple
+  author: Roohitavaf, Mo
+  date: 2021-04-04
+  url: 
+    value: https://www.mydistributed.systems/2021/04/paxos.html
+    date: 2026-10-17
+    

@@ -38,8 +38,6 @@ importers:
 
   packages/framework: {}
 
-  packages/simulator: {}
-
 packages:
 
   '@antfu/eslint-config@9.5.1':

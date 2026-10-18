@@ -5,8 +5,10 @@
   title: [Evaluating Leader Election Algorithms],
   enum-numbering: "①",
 )
-
 #include "./final-report/code.typ"
+#include "final-report/method.typ"
+#include "final-report/results.typ"
+#include "final-report/conclusion.typ"
 
 #if show_demos [
   #include "./final-report/demos.typ"

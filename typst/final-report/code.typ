@@ -54,3 +54,8 @@ The rest of the parameters are the parameters passed in `node.call()`.
 The bully algorithm presented by #pc[@garcia-bully] is transcribed as follows.
 
 #presentCode("../../packages/bully/src/index.ts")
+
+== Raft
+
+== Paxos
+We have adapted the plain English and psuedocde described by #pc[@roohitavaf-paxos] for our concrete implementations.
