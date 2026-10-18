@@ -17,7 +17,7 @@ alonso-eoap:
   abstract: Mentoring programs have been proposed to reduce dropout and increase academic performance. We analyzed the effect of peer mentoring on university dropout and academic performance in the context of Spain. We applied a quasi-experimental posttest-only control group design with 3,774 students (mentees, n = 1,887; control, n = 1,887). Mentees had participated in a peer mentoring program. We apply the student’s t-test, Cohen’s d, phi statistic, and chi-square statistic. Mentees exhibited lower dropout than controls and showed higher academic performance regardless of the area of knowledge. Results support the implementation of mentoring programs in Spanish universities with the goal of reducing student dropout and increasing academic performance. The research provides empirical evidence for theory building in higher education studies, developmental relationships, and integration programs.
   parent:
     type: periodical
-    title: "Psicología Educativa: Revista de los Psicólogos de la Educación"
+    title: 'Psicología Educativa: Revista de los Psicólogos de la Educación'
     publisher:
       name: Colegio Oficial de Psicólogos de Madrid
       location: Madrid
@@ -30,7 +30,6 @@ roohitavaf-paxos:
   title: The Paxos algorithm, when presented in plain English, is very simple
   author: Roohitavaf, Mo
   date: 2021-04-04
-  url: 
+  url:
     value: https://www.mydistributed.systems/2021/04/paxos.html
     date: 2026-10-17
-    
