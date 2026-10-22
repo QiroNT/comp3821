@@ -8,7 +8,15 @@ it('should complete in mesh', async () => {
     network.addNode()
   network.fullyConnect(() => 1)
 
-  const simulator = new Simulator(bully, network, 100)
+  const simulator = new Simulator({
+    algorithm: bully,
+    network,
+    replyTimeout: 100,
+    checkInterval: () => 10,
+    checkTimeout: () => 30,
+    maxSteps: 100,
+  })
+
   await simulator.run()
 
   expect(simulator.log()).toMatchInlineSnapshot(`
@@ -73,8 +81,18 @@ it('should not conclude if it forever timeouts', async () => {
     network.addNode()
   network.fullyConnect(() => 100)
 
-  const simulator = new Simulator(bully, network, 1)
-  await simulator.run()
+  const simulator = new Simulator({
+    algorithm: bully,
+    network,
+    replyTimeout: 1,
+    checkInterval: () => 10,
+    checkTimeout: () => 30,
+    maxSteps: 100,
+  })
+
+  await expect(simulator.run())
+    .rejects
+    .toThrow('simulation did not terminate')
 
   expect(simulator.log()).toMatchInlineSnapshot(`
     [
@@ -103,26 +121,91 @@ it('should not conclude if it forever timeouts', async () => {
       "[     2.0] 1 assertLeader(1)",
       "[     2.0] 2 assertLeader(2)",
       "[     2.0] 3 assertLeader(3)",
-      "[   100.0] 1 -> 0 areYouThere reply aborted",
-      "[   100.0] 2 -> 0 areYouThere reply aborted",
-      "[   100.0] 3 -> 0 areYouThere reply aborted",
-      "[   100.0] 4 -> 0 areYouThere reply timeout",
-      "[   100.0] 2 -> 1 areYouThere reply aborted",
-      "[   100.0] 3 -> 1 areYouThere reply aborted",
-      "[   100.0] 4 -> 1 areYouThere reply timeout",
-      "[   100.0] 3 -> 2 areYouThere reply aborted",
-      "[   100.0] 4 -> 2 areYouThere reply timeout",
-      "[   100.0] 4 -> 3 areYouThere reply timeout",
-      "[   100.0] 0 -> 4 halt reply aborted",
-      "[   100.0] 1 -> 4 halt reply aborted",
-      "[   100.0] 2 -> 4 halt reply aborted",
-      "[   100.0] 3 -> 4 halt reply timeout",
-      "[   101.0] 0 -> 1 halt reply aborted",
-      "[   101.0] 0 -> 2 halt reply aborted",
-      "[   101.0] 1 -> 2 halt reply aborted",
-      "[   101.0] 0 -> 3 halt reply timeout",
-      "[   101.0] 1 -> 3 halt reply timeout",
-      "[   101.0] 2 -> 3 halt reply timeout",
+      "[    10.0] 0 onCheck()",
+      "[    10.0] 0 -> 0 areYouNormal timeout",
+      "[    10.0] 1 onCheck()",
+      "[    10.0] 1 -> 0 areYouNormal timeout",
+      "[    10.0] 2 onCheck()",
+      "[    10.0] 2 -> 0 areYouNormal timeout",
+      "[    10.0] 3 onCheck()",
+      "[    10.0] 3 -> 0 areYouNormal timeout",
+      "[    10.0] 4 onCheck()",
+      "[    10.0] 4 -> 0 areYouNormal timeout",
+      "[    11.0] 0 -> 1 areYouNormal timeout",
+      "[    11.0] 1 -> 1 areYouNormal timeout",
+      "[    11.0] 2 -> 1 areYouNormal timeout",
+      "[    11.0] 3 -> 1 areYouNormal timeout",
+      "[    11.0] 4 -> 1 areYouNormal timeout",
+      "[    12.0] 0 -> 2 areYouNormal timeout",
+      "[    12.0] 1 -> 2 areYouNormal timeout",
+      "[    12.0] 2 -> 2 areYouNormal timeout",
+      "[    12.0] 3 -> 2 areYouNormal timeout",
+      "[    12.0] 4 -> 2 areYouNormal timeout",
+      "[    13.0] 0 -> 3 areYouNormal timeout",
+      "[    13.0] 1 -> 3 areYouNormal timeout",
+      "[    13.0] 2 -> 3 areYouNormal timeout",
+      "[    13.0] 3 -> 3 areYouNormal timeout",
+      "[    13.0] 4 -> 3 areYouNormal timeout",
+      "[    14.0] 0 -> 4 areYouNormal timeout",
+      "[    14.0] 1 -> 4 areYouNormal timeout",
+      "[    14.0] 2 -> 4 areYouNormal timeout",
+      "[    14.0] 3 -> 4 areYouNormal timeout",
+      "[    14.0] 4 -> 4 areYouNormal timeout",
+      "[    20.0] 0 onCheck()",
+      "[    20.0] 0 -> 0 areYouNormal timeout",
+      "[    20.0] 1 onCheck()",
+      "[    20.0] 1 -> 0 areYouNormal timeout",
+      "[    20.0] 2 onCheck()",
+      "[    20.0] 2 -> 0 areYouNormal timeout",
+      "[    20.0] 3 onCheck()",
+      "[    20.0] 3 -> 0 areYouNormal timeout",
+      "[    20.0] 4 onCheck()",
+      "[    20.0] 4 -> 0 areYouNormal timeout",
+      "[    21.0] 0 -> 1 areYouNormal timeout",
+      "[    21.0] 1 -> 1 areYouNormal timeout",
+      "[    21.0] 2 -> 1 areYouNormal timeout",
+      "[    21.0] 3 -> 1 areYouNormal timeout",
+      "[    21.0] 4 -> 1 areYouNormal timeout",
+      "[    22.0] 0 -> 2 areYouNormal timeout",
+      "[    22.0] 1 -> 2 areYouNormal timeout",
+      "[    22.0] 2 -> 2 areYouNormal timeout",
+      "[    22.0] 3 -> 2 areYouNormal timeout",
+      "[    22.0] 4 -> 2 areYouNormal timeout",
+      "[    23.0] 0 -> 3 areYouNormal timeout",
+      "[    23.0] 1 -> 3 areYouNormal timeout",
+      "[    23.0] 2 -> 3 areYouNormal timeout",
+      "[    23.0] 3 -> 3 areYouNormal timeout",
+      "[    23.0] 4 -> 3 areYouNormal timeout",
+      "[    24.0] 0 -> 4 areYouNormal timeout",
+      "[    24.0] 1 -> 4 areYouNormal timeout",
+      "[    24.0] 2 -> 4 areYouNormal timeout",
+      "[    24.0] 3 -> 4 areYouNormal timeout",
+      "[    24.0] 4 -> 4 areYouNormal timeout",
+      "[    30.0] 0 onCheck()",
+      "[    30.0] 0 -> 0 areYouNormal timeout",
+      "[    30.0] 1 onCheck()",
+      "[    30.0] 1 -> 0 areYouNormal timeout",
+      "[    30.0] 2 onCheck()",
+      "[    30.0] 2 -> 0 areYouNormal timeout",
+      "[    30.0] 3 onCheck()",
+      "[    30.0] 3 -> 0 areYouNormal timeout",
+      "[    30.0] 4 onCheck()",
+      "[    30.0] 4 -> 0 areYouNormal timeout",
+      "[    31.0] 0 -> 1 areYouNormal timeout",
+      "[    31.0] 1 -> 1 areYouNormal timeout",
+      "[    31.0] 2 -> 1 areYouNormal timeout",
+      "[    31.0] 3 -> 1 areYouNormal timeout",
+      "[    31.0] 4 -> 1 areYouNormal timeout",
+      "[    32.0] 0 -> 2 areYouNormal timeout",
+      "[    32.0] 1 -> 2 areYouNormal timeout",
+      "[    32.0] 2 -> 2 areYouNormal timeout",
+      "[    32.0] 3 -> 2 areYouNormal timeout",
+      "[    32.0] 4 -> 2 areYouNormal timeout",
+      "[    33.0] 0 -> 3 areYouNormal",
+      "[    33.0] 1 -> 3 areYouNormal",
+      "[    33.0] 2 -> 3 areYouNormal",
+      "[    33.0] 3 -> 3 areYouNormal",
+      "[    33.0] 4 -> 3 areYouNormal",
     ]
   `)
 })

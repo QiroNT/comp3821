@@ -38,8 +38,11 @@ export function fn<
 export type NodeThis = Record<string, any> & {
   id: number
   network: NodeRef[]
-  abortOutstanding: () => void
+  abortOutstanding: () => number
   assertLeader: (leader?: NodeRef | NodeThis) => void
+
+  scheduleCheck: (repeat: boolean) => void
+  scheduleTimeout: (repeat: boolean) => void
 
   callAll: <A extends unknown[], R>(
     nodes: NodeRef[],
@@ -57,9 +60,9 @@ export type NodeRef = Record<string, any> & {
 }
 
 export interface AlgorithmEvents {
-  onCheck?: (this: NodeThis) => void
-  onRecovery?: (this: NodeThis) => void
-  onTimeout?: (this: NodeThis) => void
+  onCheck?: (this: NodeThis) => MaybePromise<void>
+  onRecovery?: (this: NodeThis) => MaybePromise<void>
+  onTimeout?: (this: NodeThis) => MaybePromise<void>
 }
 
 export interface Algorithm {
