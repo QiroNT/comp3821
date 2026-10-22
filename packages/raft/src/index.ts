@@ -3,83 +3,64 @@ import { fn, rpc } from 'framework'
 
 /* eslint prefer-arrow-callback: "off" */
 
-/**
- * This procedure is called by coordinators to discover the state of a node.
- */
-const areYouNormal = rpc<boolean>()(async function areYouNormal({ reply }) {
-  if (this.state === 'normal') {
-    await reply(true)
-  }
-  else {
-    await reply(false)
-  }
+// The node's expected properties/attributes:
+/*
+raftNode = {
+    state:  'follower' | 'candidate' | 'leader'
+    followerTimeout: a time
+    candidateTimeout: a time
+    leaderTimeout: a time
+    term: positive integer starting from 0
+    voted: boolean
+    votes: positive integer starting from 0
+}
+*/
+
+// algorithm begin
+
+// A candidate calls this to request a vote
+const requestVote = rpc()(async function requestVotes() {
+
 })
 
-// algorithm start
-
-// Sent by the leader as a heartbeat message
-const leaderAlive = rpc()(async function areYouThere({ reply }) {
-  await reply()
-})
-
-// The node attempts to be coordinator by calling this.
-const requestVotes = fn(async function requestVotes() {
-
+// the heartbeat function called by a coordinator
+const appendEntry = rpc()(async function appendEntry() {
+  // TODO: reset timeout
+  // TODO: step down if term out of date
 })
 
 const election = fn(async function election() {
+  // TODO: ELECTION!
+})
+
+const onCheck = fn(async function onCheck() {
+  // only coordinator checks if all nodes are up.
+  if (this.coordinator === this && this.state === 'leader') {
+    for (const node of this.network) {
+      const { status, response } = await node.call(appendEntry)
+    }
+  }
+})
+
+// When the system starts, or when the node recovers
+const onRecovery = fn(async function onRecovery() {
+  // initiate all the expected attributes
+  // TODO ^^^
+  this.state = 'follower'
+  this.term = 0
+  // the node will now wait to timeout.
+})
+
+// When the node hasn't heard from the leader recently
+const onTimeout = fn(async function onTimeout() {
   this.state = 'candidate'
+  this.term += 1
+  election.call(this)
 })
 
 // algorithm end
 
-// Taken from Bully
-/**
- * This procedure is automatically called by the operating system when a node
- * starts up after a failure.
- */
-const onRecovery = fn(async function onRecovery() {
-  delete this.haltedBy
-  await election.call(this)
-})
-
-/**
- * This procedure is called periodically by the operating system.
- */
-const onCheck = fn(async function onCheck() {
-  if (this.state === 'normal' && this.coordinator === this) {
-    // I am coordinator. Check if everyone else is normal.
-    for (const node of this.network) {
-      const { status, response } = await node.call(areYouNormal)
-      if (status === 'timeout') {
-        continue
-      }
-      if (response === false) {
-        await election.call(this)
-        return
-      }
-    }
-  }
-})
-
-/**
- * This procedure is called automatically when the node has not heard from the
- * coordinator in a "long" time.
- */
-const onTimeout = fn(async function onTimeout() {
-  if (this.state === 'normal' || this.state === 'reorganization') {
-    // Check if coordinator is up.
-    const { status } = await this.coordinator.call(areYouThere)
-    if (status === 'timeout') {
-      await election.call(this)
-    }
-  }
-  else {
-    await election.call(this)
-  }
-})
-
 export const raft: Algorithm = {
   rpcs: [],
-  events: { onRecovery, onCheck, onTimeout },
+  events: { onCheck, onRecovery, onTimeout },
 }
