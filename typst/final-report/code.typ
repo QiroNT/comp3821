@@ -21,6 +21,13 @@ Some parts of the local state are maintained by the framework itself. They are a
   duration of the election.
 - `this.abortOutstanding` is a function that when called, cancels all other functions on the node currently waiting on
   an `await` point.
+
+  This function takes a parameter `tag`, which specifies what type of pending functions are aborted. By default it is
+  `rpc`, meaning that only in flight rpc responses are aborted. Available tags are `rpc`, `onCheck`, and `onTimeout`.
+- `this.scheduleCheck` schedules the algorithm's `onCheck` function to be called on the current node. This function
+  takes in a `repeat` parameter, to specify whether `onCheck` should be called on an interval, or just once.
+- `this.scheduleTimeout` schedules the algorithm's `onTimeout` function to be called on the current node. This function
+  also takes in a `repeat` parameter, to specify whether `onTimeout` should be called on an interval, or just once.
 - `this.assertLeader` is a function which signals to the framework that the current node thinks this node is the leader.
   This is used as a stop condition, when all nodes have called `assertLeader` with the same leader node.
 - `this.callAll` is a utility function that broadcasts an RPC to an array of nodes.
@@ -51,11 +58,12 @@ The rest of the parameters are the parameters passed in `node.call()`.
 
 == Bully
 
-The bully algorithm presented by #pc[@garcia-bully] is transcribed as follows.
+The Bully algorithm presented by #pc[@garcia-bully] is transcribed as follows.
 
 #presentCode("../../packages/bully/src/index.ts")
 
 == Raft
 
 == Paxos
-We have adapted the plain English and psuedocde described by #pc[@roohitavaf-paxos] for our concrete implementations.
+
+We have adapted the plain English and pseudocode described by #pc[@roohitavaf-paxos] for our concrete implementations.
