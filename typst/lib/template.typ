@@ -29,6 +29,12 @@
   ..rest,
 )
 
+#let emails(users, domain) = {
+  "{"
+  users.map(u => link("mailto:" + u + "@" + domain, u)).join(",")
+  "}@" + domain
+}
+
 #let template(title: [], enum-numbering: "1.", doc) = [
   #show ref: theoretic.show-ref
   #show ref: el.show-ref
@@ -45,20 +51,8 @@
 
   #align(center, text(title, 17pt))
   #align(center)[
-    #columns(3, gutter: 8pt)[
-      Edmond Cheng\
-      #link("mailto:edmond.cheng@unsw.edu.au")
-
-      #colbreak()
-
-      Lachlan Martin\
-      #link("mailto:lachlan.t.martin@unsw.edu.au")
-
-      #colbreak()
-
-      Chino Zhou\
-      #link("mailto:tianxiang.zhou2@unsw.edu.au")
-    ]
+    Edmond Cheng, Lachlan Martin, Chino Zhou, Akindu Jayatilleke, Gia Phat Bui\
+    #emails(("edmond.cheng", "lachlan.t.martin", "tianxiang.zhou2", "a.jayatilleke", "g.bui"), "student.unsw.edu.au")
   ]
 
   #doc
