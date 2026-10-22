@@ -1,5 +1,5 @@
 #import "./lib/template.typ": template
-#import "final-report/config.typ": *
+#import "./final-report/config.typ": *
 
 #show: template.with(
   title: [Evaluating Leader Election Algorithms],
@@ -7,9 +7,9 @@
 )
 
 #include "./final-report/code.typ"
-#include "final-report/method.typ"
-#include "final-report/results.typ"
-#include "final-report/conclusion.typ"
+#include "./final-report/method.typ"
+#include "./final-report/results.typ"
+#include "./final-report/conclusion.typ"
 
 #if show_demos [
   #include "./final-report/demos.typ"

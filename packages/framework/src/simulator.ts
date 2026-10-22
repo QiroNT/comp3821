@@ -296,52 +296,56 @@ export class Simulator {
     tag: AbortableTag,
     f: (aborted: boolean) => T,
   ): Promise<Awaited<T>> {
-    return new Promise((resolve, reject) => {
-      let settled = false
+    const { promise, resolve, reject } = Promise.withResolvers<Awaited<T>>()
 
-      const abortable = {
-        tag,
-        abort: () => {
-          if (settled)
-            return
-          settled = true
-          this.inFlight.get(id)?.delete(abortable)
+    let settled = false
 
-          reject(new AbortError())
-        },
-      } satisfies Abortable
-
-      let pending = this.inFlight.get(id)
-      if (!pending) {
-        pending = new Set()
-        this.inFlight.set(id, pending)
-      }
-
-      pending.add(abortable)
-
-      this.at(at, async () => {
-        // we still run the content even when it's aborted, just not returning it
-        const r = Promise.resolve(f(settled))
-        r.catch((error) => {
-          this.noteError(id, error)
-        })
-
+    const abortable = {
+      tag,
+      abort: () => {
         if (settled)
           return
         settled = true
         this.inFlight.get(id)?.delete(abortable)
 
-        resolve(await r)
+        reject(new AbortError())
+      },
+    } satisfies Abortable
+
+    let pending = this.inFlight.get(id)
+    if (!pending) {
+      pending = new Set()
+      this.inFlight.set(id, pending)
+    }
+
+    pending.add(abortable)
+
+    this.at(at, async () => {
+      // we still run the content even when it's aborted, just not returning it
+      const r = Promise.resolve(f(settled))
+      r.catch((error) => {
+        this.noteError(id, error)
       })
+
+      if (settled)
+        return
+      settled = true
+      this.inFlight.get(id)?.delete(abortable)
+
+      resolve(await r)
     })
+
+    return promise
   }
 
   private schedule<T>(at: number, f: () => T): Promise<T> {
-    return new Promise((resolve) => {
-      this.at(at, () => {
-        resolve(f())
-      })
+    const { promise, resolve } = Promise.withResolvers<T>()
+
+    this.at(at, () => {
+      resolve(f())
     })
+
+    return promise
   }
 
   private at(time: number, run: () => void) {
@@ -366,8 +370,7 @@ export class Simulator {
         this.startNode(node, onRecovery)
     }
 
-    // flush the microtask queue
-    await new Promise(resolve => setTimeout(resolve, 0))
+    await this.flush()
 
     let steps = 0
     while (!this.finished) {
@@ -381,7 +384,7 @@ export class Simulator {
       this.time = event.time
       event.run()
 
-      await new Promise(resolve => setTimeout(resolve, 0))
+      await this.flush()
     }
 
     if (this.failure !== undefined)
@@ -415,5 +418,10 @@ export class Simulator {
 
   private timestamp() {
     return this.time.toFixed(1).padStart(8, ' ')
+  }
+
+  private flush() {
+    // flush the microtask queue
+    return new Promise(resolve => setTimeout(resolve, 0))
   }
 }
