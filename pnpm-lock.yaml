@@ -44,6 +44,12 @@ importers:
 
   packages/framework: {}
 
+  packages/raft:
+    dependencies:
+      framework:
+        specifier: workspace:*
+        version: link:../framework
+
 packages:
 
   '@antfu/eslint-config@9.5.1':
