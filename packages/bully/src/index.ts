@@ -114,6 +114,9 @@ const election = fn(async function election() {
  * starts up after a failure.
  */
 const onRecovery = fn(async function onRecovery() {
+  this.scheduleCheck(true)
+  this.scheduleTimeout(true)
+
   delete this.haltedBy
   await election.call(this)
 })
