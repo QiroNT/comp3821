@@ -1,3 +1,4 @@
+/* eslint-disable no-empty-pattern */
 import type { Algorithm } from 'framework'
 import { fn, rpc } from 'framework'
 
@@ -45,7 +46,7 @@ const onRecovery = fn(async function onRecovery() {
   this.scheduleTimeout(true)
 })
 
-const proposerAccepted = rpc()(async function proposerAccepted({ sender }, promise_number: number) {
+const proposerAccepted = rpc()(async function proposerAccepted({ }, promise_number: number) {
   if (promise_number !== this.proposer.proposal_number)
     return
 
@@ -57,7 +58,7 @@ const proposerAccepted = rpc()(async function proposerAccepted({ sender }, promi
   }
 })
 
-const proposerNack = rpc()(async function proposerNack({ sender }, promise_number: number) {
+const proposerNack = rpc()(async function proposerNack({ }, promise_number: number) {
   if (promise_number !== this.proposer.proposal_number)
     return
 
@@ -78,7 +79,7 @@ const acceptorAccept = rpc()(async function acceptorAccept({ sender }, promise_n
   }
 })
 
-const proposerPromise = rpc()(async function proposerPromise({ sender }, promise_number: number, promise: PaxosPromise) {
+const proposerPromise = rpc()(async function proposerPromise({ }, promise_number: number, promise: PaxosPromise) {
   if (promise_number !== this.proposer.proposal_number)
     return
   this.proposer.promises.push(promise)
