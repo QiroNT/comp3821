@@ -44,6 +44,12 @@ importers:
 
   packages/framework: {}
 
+  packages/paxos:
+    dependencies:
+      framework:
+        specifier: workspace:*
+        version: link:../framework
+
   packages/raft:
     dependencies:
       framework:
