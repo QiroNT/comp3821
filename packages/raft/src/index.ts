@@ -114,9 +114,6 @@ const onRecovery = fn(async function onRecovery() {
 
 // a generic timeout event
 const onTimeout = fn(async function onTimeout() {
-  if (!this.state) {
-    this.state = RaftState.FOLLOWER
-  }
   if (this.state === RaftState.FOLLOWER) {
     this.state = RaftState.CANDIDATE
     election.call(this)
