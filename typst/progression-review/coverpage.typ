@@ -1,5 +1,5 @@
 #let title-page(title:[], people:[], fill: yellow, body) = {
-  set page(fill: rgb("#fcf5a7"), margin: (top: 1.5in, rest: 2in))
+  set page(fill: rgb("#fffac2"), margin: (top: 1.5in, rest: 2in))
   set text(font: "Source Sans Pro", size: 14pt)
   set heading(numbering: "1.1.1")
   line(start: (0%, 0%), end: (8.5in, 0%), stroke: (thickness: 2pt))
@@ -23,9 +23,9 @@
 
 #let group = (
   AkinduZID: "Akindu Jayatilleke",
-  ChinoZID: "Chino Zhou",
+  z5645020: "Chino Zhou",
   z5689122: "Edmond Cheng",
-  LachlanZID: "Lachlan Martin",
+  z5691769: "Lachlan Martin",
   GiaZID: "Gia Phat Bui",
 )
 
