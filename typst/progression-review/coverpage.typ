@@ -22,11 +22,11 @@
 }
 
 #let group = (
-  AkinduZID: "Akindu Jayatilleke",
+  z5702573: "Akindu Jayatilleke",
   z5645020: "Chino Zhou",
   z5689122: "Edmond Cheng",
   z5691769: "Lachlan Martin",
-  GiaZID: "Gia Phat Bui",
+  z5717025: "Gia Phat Bui",
 )
 
 #show: body => title-page(
