@@ -98,7 +98,16 @@ const election = fn(async function election() {
 const onCheck = fn(async function onCheck() {
   // only coordinator checks if all nodes are up.
   if (this.coordinator === this && this.state === RaftState.LEADER) {
-    // TODO
+    for (const node of this.network) {
+      const { status, response } = await node.call(appendEntry)
+      if (status === 'timeout') {
+        continue
+      }
+      if (response === false) {
+        await election.call(this)
+        return
+      }
+    }
   }
 })
 
