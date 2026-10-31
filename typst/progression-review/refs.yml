@@ -1,0 +1,15 @@
+# Real Sources
+roohitavaf-paxos:
+  type: article
+  title: The Paxos algorithm, when presented in plain English, is very simple
+  author: Roohitavaf, Mo
+  date: 2021-04-04
+  url:
+    value: https://www.mydistributed.systems/2021/04/paxos.html
+    date: 2026-10-17
+
+howard-raft:
+  type: report
+  title: 'ARC: Analysis of Raft Consensus'
+  author: Howard, Heidi
+  date: 2014-06
