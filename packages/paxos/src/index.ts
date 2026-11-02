@@ -85,7 +85,7 @@ const proposerPromise = rpc()(async function proposerPromise({ }, promise_number
   this.proposer.promises.push(promise)
 
   if (this.proposer.promises.length >= Math.ceil((this.network.length + 1) / 2)) {
-    let v: number = this.promiser.value
+    let v: number = this.proposer.value
     const array: Array<number> = []
     const promiseMaxVal = array.reduce((prev, curr) => {
       if (prev < curr)
