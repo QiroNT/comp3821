@@ -34,9 +34,17 @@ export class Network {
   }
 
   fullyConnect(latency: LatencyGenerator) {
-    for (const a of this.nodes) {
-      for (const b of this.nodes)
-        this.connectNodes(a, b, latency)
+    for (let i = 0; i < this.nodes.length; i++) {
+      for (let j = i + 1; j < this.nodes.length; j++) {
+        this.connectNodes(this.nodes[i], this.nodes[j], latency)
+      }
+    }
+  }
+
+  connectRing(latency: LatencyGenerator) {
+    for (let i = 0; i < this.nodes.length; i++) {
+      const next = (i + 1) % this.nodes.length
+      this.connectNodes(this.nodes[i], this.nodes[next], latency)
     }
   }
 }
