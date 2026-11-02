@@ -1,4 +1,9 @@
 = Revised Plan
+After receiving feedback for our proposal, we realised that our initial scope was too large and present both time constraint challenges as well as domain knowledge limits.
+We simply didn't have enough time to implement more than 3 algorithms as well as ensuring the validity of varying network topolgies and latencies.
+We also would've had to spend a lot more time researching leader election algorithms to be able to fully understand the theoretical effects of changing various variables.
+Thus we narrowed our scope to change fewer variables so that we could finish on time and have a smaller set of required theoretical knowledge.
+
 Starting this week (week 8), we will begin testing our algorithms.
 We expect there to be some amount of debugging during this phase will not collect results until weekend of Week 8 or the Monday of Week 9.
 An allocation of around a week to finalise our implementation is appropriate as we still face the challenge of ensuring code correctness.
