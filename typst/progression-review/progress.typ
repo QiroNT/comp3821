@@ -44,3 +44,10 @@ Our current challenge with the implementation is verifying its correctness.
 We are unsure whether we've covered all edge cases in the algorithm.
 
 == Paxos Implementation
+
+== Final Report
+Throughout our research and implementation, we have been adding to our final report.
+As we perform research, we add to our introduction which generally describes leader election algorithms as well as key characteristics of the bully, raft and paxos algorithms.
+Code that we write for testing is directly added to the report with annotations added to describe functionality.
+
+We have also structured our report with space to add findings, a discussion of the findings and correctness justification for our algorithms.
