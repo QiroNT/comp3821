@@ -67,7 +67,7 @@ const proposerNack = rpc()(async function proposerNack({ }, promise_number: numb
 })
 
 const acceptorAccept = rpc()(async function acceptorAccept({ sender }, promise_number: number, node_index: number) {
-  if (this.acceptor.promised_number < promise_number) {
+  if (this.acceptor.promised_number <= promise_number) {
     this.acceptor.promised_number = promise_number
     this.acceptor.accepted_number = promise_number
     this.acceptor.accepted_value = node_index
