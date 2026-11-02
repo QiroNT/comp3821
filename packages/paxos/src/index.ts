@@ -52,7 +52,7 @@ const proposerAccepted = rpc()(async function proposerAccepted({ }, promise_numb
 
   this.proposer.acknowledgements++
 
-  if (this.proposer.acknowledgements >= Math.ceil((this.network.length + 1) / 2)) {
+  if (this.proposer.acknowledgements === Math.ceil((this.network.length + 1) / 2)) {
     this.assertLeader(this)
     this.callAll(this.network, leanerDecide, this.id)
   }
@@ -84,7 +84,7 @@ const proposerPromise = rpc()(async function proposerPromise({ }, promise_number
     return
   this.proposer.promises.push(promise)
 
-  if (this.proposer.promises.length >= Math.ceil((this.network.length + 1) / 2)) {
+  if (this.proposer.promises.length === Math.ceil((this.network.length + 1) / 2)) {
     let v: number = this.proposer.value
     const array: Array<number> = []
     const promiseMaxVal = array.reduce((prev, curr) => {
