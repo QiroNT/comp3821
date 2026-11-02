@@ -43,9 +43,12 @@ export class Simulator {
   ) { }
 
   reset() {
-    this.nodes = this.config.network.nodes.map((_, id) => this.createNode(id))
-    for (const node of this.nodes)
-      node.network = this.nodes.map(target => this.createRef(node, target))
+    const { nodes } = this.config.network
+    this.nodes = nodes.map((_, id) => this.createNode(id))
+    for (const node of this.nodes) {
+      const neighbors = new Set([...nodes[node.id].neighbors].map(n => nodes.indexOf(n.node)))
+      node.network = [...neighbors].sort((a, b) => a - b).map(id => this.createRef(node, this.nodes[id]))
+    }
 
     this.time = 0
     this.logs = []
@@ -285,7 +288,7 @@ export class Simulator {
 
     const link = [...a.neighbors].find(neighbor => neighbor.node === b)
     if (!link)
-      throw new Error(`node ${from} tried to call non-neighboring node ${to}`)
+      throw new Error(`node ${from.id} tried to call non-neighboring node ${to.id}`)
 
     return link.latency(a, b)
   }
