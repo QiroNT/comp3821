@@ -8,6 +8,15 @@ roohitavaf-paxos:
     value: https://www.mydistributed.systems/2021/04/paxos.html
     date: 2026-10-17
 
+leslie-paxos:
+  type: report
+  title: Paxos Made Simple
+  author: Lamport, Leslie
+  date: 2001-11-01
+  url:
+    value: https://lamport.azurewebsites.net/pubs/paxos-simple.pdf
+    date: 2026-10-17
+
 howard-raft:
   type: report
   title: 'ARC: Analysis of Raft Consensus'

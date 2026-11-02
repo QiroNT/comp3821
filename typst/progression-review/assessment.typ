@@ -1,23 +1,19 @@
 = Progression Assessment
-According to our inital plan, by this time (week 8), we should've completed:
-+ a definition of network topologies, along with additional refinements to our variables
-+ collected various pseudocode for our algorithms
-+ researched theoretical bounds for our algorithms
-+ written code for our algorithms
-+ built testing frameworks
-+ tested our algorithms and gathered data
-+ interpreted our results.
+According to our proposal, by the end of week 7, we should have completed the following tasks:
++ Defining network topologies, along with refinements to our experimental variables.
++ Found pseudocode for each algorithm we planned to implement.
++ Researched theoretical bounds for each algorithm.
++ Built a testing framework for the algorithms.
++ Implemented each algorithm .
++ Tested each algorithm and gathered data.
++ Performed an initial interpretationo of the results.
 
-Currently we have only completed up to the 5th dot point.
-Whilst this means we are behind schedule, we are not too far behind as what remains to be completed after is to finalise results, and create the poster and report.
+Currently, we have only completed up to point five.
+Whilst this means we are behind schedule, our choice to include week 8 as a flexible week means we should be able to recover and return to being on schedule by the start of week 9 which will give us ample time to write the report and create the poster.
 
-Our delay was mainly caused by trying to refine and narrow our scope.
-Initially we intended to test a wider variety of algorithms on a larger set of independent variables.
-However, upon feedback for our proposal, we undertook further research to attempt to narrow our scope in an interesting way.
-This introduced our delay but also allowed us to continue to experiment with smaller set of variables that could still produce novel results.
+Our primary delay was mainly caused by a need to refine and narrow our scope. Initially we intended to test a wider variety of algorithms on a larger set of independent variables.
+However, after reviewing feedback for our proposal, we undertook further research to narrow our scope to create a more useful comparison between algorithms.
+This reduction will also allow us to perform a more specific experiment that could still produce novel results.
 
-We believe our code implementations are satisfactory whilst not being outstanding.
-This is because we attempted to speed up development due to our initial delay and cobbled together code that works.
-However, during this process, we forgot to define steps to ensure correctness for both the framework and the algorithm.
-Additionally, learning how to use the framework as a team was a small challenge as we produced little documentation when trying to quickly implement it.
-We are still faced with the hurdle of ensuring correctness within our code. We plan to do additional research, review our current papers, and consult our mentor to see how we can ensure correctness.
+We believe our algorithm implementations are satisfactory in replicating the expected behaviour of each algorithm. While the testing framework was developed quite quickly, this was at the expense of thorough documentation, which caused further delay as development time went to understanding how best to use the framework for each algoithm.
+We are also yet to define steps to ensure correctness for both the framework and the algorithms. To alleviate this, we plan spend the first half of week 8 researching and reviewing our reference papers, and consulting our mentor to see how we can ensure correctness, which will allow us to confidently move forward with experimental tests.
