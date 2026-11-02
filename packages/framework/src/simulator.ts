@@ -159,10 +159,7 @@ export class Simulator {
 
   private scheduleTimeout(id: number, repeat: boolean) {
     const leader = this.leaders.get(id)
-    if (!leader || leader === id)
-      return
-
-    const msgCount = this.msgCounter.get(id)?.get(leader) || 0
+    const msgCount = leader === undefined ? 0 : this.msgCounter.get(id)?.get(leader) ?? 0
 
     this.scheduleAbortable(
       id,
@@ -176,14 +173,16 @@ export class Simulator {
         if (!node)
           return
 
-        const newLeader = this.leaders.get(id)
-        if (newLeader !== leader)
-          return // maybe we should do sth here, but we don't have any data to work with
-
         if (repeat)
           this.scheduleTimeout(id, repeat)
 
-        const newMsgCount = this.msgCounter.get(id)?.get(leader) || 0
+        // a leader doesn't time out on itself, and learning of a new leader
+        // counts as hearing from one
+        const newLeader = this.leaders.get(id)
+        if (newLeader === id || newLeader !== leader)
+          return
+
+        const newMsgCount = leader === undefined ? 0 : this.msgCounter.get(id)?.get(leader) ?? 0
         if (newMsgCount > msgCount)
           return
 
