@@ -266,7 +266,15 @@ export class Simulator {
       from.id,
       this.time + Math.max(0, latency),
       'rpc',
-      () => f(sender, target),
+      () => {
+        let counts = this.msgCounter.get(to.id)
+        if (!counts) {
+          counts = new Map()
+          this.msgCounter.set(to.id, counts)
+        }
+        counts.set(from.id, (counts.get(from.id) ?? 0) + 1)
+        return f(sender, target)
+      },
     )
 
     const ret = Promise.race([timeout, response])
