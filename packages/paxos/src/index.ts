@@ -116,7 +116,7 @@ const onTimeout = fn(async function onTimeout() {
   this.proposer.acknowledgements = 0
   this.proposer.promises = []
 
-  this.callAll(this.network, acceptorPrepare, this.proposal_number)
+  this.callAll(this.network, acceptorPrepare, this.proposer.proposal_number)
 })
 
 export const paxos: Algorithm = {
