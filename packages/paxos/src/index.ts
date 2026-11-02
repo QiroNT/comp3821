@@ -41,7 +41,7 @@ const leanerDecide = rpc()(async function leanerDecide({ sender }, node_index: n
 const onRecovery = fn(async function onRecovery() {
   this.proposer = new Proposer()
   this.acceptor = new Acceptor()
-  this.listener = new Listener()
+  this.learner = new Listener()
   // the node will now wait to timeout.
   this.scheduleTimeout(true)
 })
