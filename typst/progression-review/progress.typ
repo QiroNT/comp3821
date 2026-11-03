@@ -49,8 +49,8 @@ of the algorithm.
 == Raft Implementation
 Since we could not find reliable sources of pseudocode to translate, we implemented the raft algorithm based on
 #pc[@howard-raft] with reliance on the state diagram provided in the paper. Whilst the paper provides code, it uses
-OCaml, a language which uses the functional paradigm, which clashes with our usage of TypeScript, largely an imperative
-language, making direct translation tricky. To facilitate our implementation, we chose to follow the state diagram from
+OCaml, a language that uses the functional paradigm, which clashes with our usage of TypeScript (a largely an imperative
+language), making direct translation tricky. To facilitate our implementation, we chose to follow the state diagram from
 the Raft paper, whilst implementing all operations and addressing all edge cases.
 #figure(
   image("images/raft-state.png", width: 80%),
@@ -60,7 +60,7 @@ the Raft paper, whilst implementing all operations and addressing all edge cases
 )
 To closely follow this, each transition state has its own function. 
 // For example, we have implemented a function for a
-timeout event.
+// timeout event.
 // #figure(
   // ```js
   // const onTimeout = fn(async function onTimeout() {
@@ -72,7 +72,7 @@ timeout event.
       // election.call(this)
     // }
     // if (this.state === RaftState.LEADER) {
-      send heartbeat pulses
+      // send heartbeat pulses
       // for (const node of this.network) {
         // await node.call(appendEntry)
       // }

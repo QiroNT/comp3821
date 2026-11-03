@@ -4,12 +4,14 @@
   set heading(numbering: "1.1.1")
   line(start: (0%, 0%), end: (8.5in, 0%), stroke: (thickness: 2pt))
   align(horizon + left)[
-    #text(size: 24pt, title)\
+    #block(width:auto)[
+      #text(size: 24pt, hyphenate: false, title)\
+    ]
     #v(1em)
-    Progression Review
+    *Progression Review*
     #v(2em)
     #for (zid, name) in people [
-      #name (#zid),
+      #name (#zid) \
     ]
   ]
 
@@ -25,10 +27,11 @@
   z5702573: "Akindu Jayatilleke",
   z5645020: "Chino Zhou",
   z5689122: "Edmond Cheng",
-  z5691769: "Lachlan Martin",
   z5717025: "Gia Phat Bui",
+  z5691769: "Lachlan Martin",
 )
 
+#set page(numbering: none)
 #show: body => title-page(
   title: [Evaluating Leader Election Algorithms],
   people: group,
