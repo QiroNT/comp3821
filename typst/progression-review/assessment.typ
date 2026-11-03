@@ -6,7 +6,7 @@ According to our proposal, by the end of week 7, we should have completed the fo
 + Built a testing framework for the algorithms.
 + Implemented each algorithm .
 + Tested each algorithm and gathered data.
-+ Performed an initial interpretationo of the results.
++ Performed an initial interpretation of the results.
 
 Currently, we have only completed up to point five. Whilst this means we are behind schedule, our choice to include week
 8 as a flexible week means we should be able to recover and return to being on schedule by the start of week 9 which
