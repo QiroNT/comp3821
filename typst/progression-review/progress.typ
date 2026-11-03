@@ -17,29 +17,29 @@ the Raft paper, whilst implementing all operations and addressing all edge cases
     The state transition diagram for the Raft algorithm. (Taken from #pc[@howard-raft])
   ],
 )
-To closely follow this, each transition state has its own function. For example, we have implemented a function for a
+To closely follow this, each transition state has its own function. 
+// For example, we have implemented a function for a
 timeout event.
-#figure(
-  ```js
-  const onTimeout = fn(async function onTimeout() {
-    if (this.state === RaftState.FOLLOWER) {
-      this.state = RaftState.CANDIDATE
-      election.call(this)
-    }
-    if (this.state === RaftState.CANDIDATE) {
-      election.call(this)
-    }
-    if (this.state === RaftState.LEADER) {
-      // send heartbeat pulses
-      for (const node of this.network) {
-        await node.call(appendEntry)
-      }
-    }
-  })
-  ```,
-  caption: [A timeout event that starts a state transition in the raft algorithm],
-)
-
+// #figure(
+  // ```js
+  // const onTimeout = fn(async function onTimeout() {
+    // if (this.state === RaftState.FOLLOWER) {
+      // this.state = RaftState.CANDIDATE
+      // election.call(this)
+    // }
+    // if (this.state === RaftState.CANDIDATE) {
+      // election.call(this)
+    // }
+    // if (this.state === RaftState.LEADER) {
+      send heartbeat pulses
+      // for (const node of this.network) {
+        // await node.call(appendEntry)
+      // }
+    // }
+  // })
+  // ```,
+  // caption: [A timeout event that starts a state transition in the raft algorithm],
+// )
 All state transitions and corresponding functionality, such as a node increasing its vote count, have been implemented.
 Our current challenge with the implementation is verifying its correctness. We are also unsure whether we have covered
 all edge cases in the algorithm.
