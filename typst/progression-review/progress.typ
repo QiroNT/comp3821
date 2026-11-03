@@ -26,9 +26,9 @@ In order to unit test our algorithm implementations, we have built a determinist
 network, and runs the algorithms until a leader consensuses is reached. The framework helps us catch bugs in our
 implementation, and get an early glance into the behaviours of the algorithms.
 
-The simulator has configurable parameters for networking latency and timeout, and configurable intervals for the
-`onCheck` / `onTimeout` events. This allows us to vary the network latency within a topology and verify that, for
-example, network conditions that are unsolvable should never reach a consensus.
+The simulator has configurable parameters for networking latency and timeout, and configurable intervals for events.
+This allows us to vary the network latency within a topology and verify that, for example, network conditions that are
+unsolvable should never reach a consensus.
 
 For debugging purposes, the simulator records a log of all messages sent between the nodes. Every test file hence
 includes a copy of their log. This way, we can visualize the interaction between nodes to spot any anomalies. It also
