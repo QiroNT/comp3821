@@ -45,9 +45,14 @@ export class Simulator {
   reset() {
     const { nodes } = this.config.network
     this.nodes = nodes.map((_, id) => this.createNode(id))
+
     for (const node of this.nodes) {
-      const neighbors = new Set([...nodes[node.id].neighbors].map(n => nodes.indexOf(n.node)))
-      node.network = [...neighbors].sort((a, b) => a - b).map(id => this.createRef(node, this.nodes[id]))
+      const neighbors = new Set([...nodes[node.id].neighbors]
+        .map(n => nodes.indexOf(n.node)))
+
+      node.network = [...neighbors]
+        .sort((a, b) => a - b)
+        .map(id => this.createRef(node, this.nodes[id]))
     }
 
     this.time = 0
