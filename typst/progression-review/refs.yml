@@ -9,16 +9,111 @@ roohitavaf-paxos:
     date: 2026-10-17
 
 leslie-paxos:
-  type: report
+  type: article
   title: Paxos Made Simple
   author: Lamport, Leslie
-  date: 2001-11-01
+  date: 2001-12
+  page-range: 51-58
   url:
     value: https://lamport.azurewebsites.net/pubs/paxos-simple.pdf
     date: 2026-10-17
+  parent:
+    type: periodical
+    title: ACM SIGACT News (Distributed Computing Column)
+    volume: 32
+    issue: 4
 
 howard-raft:
   type: report
   title: 'ARC: Analysis of Raft Consensus'
   author: Howard, Heidi
-  date: 2014-06
+  date: 2014-07
+  number: UCAM-CL-TR-857
+  serial-number:
+    doi: 10.48456/tr-857
+  url:
+    value: https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-857.pdf
+    date: 2026-11-03
+  publisher:
+    name: University of Cambridge, Computer Laboratory
+    location: Cambridge
+
+ongaro-raft:
+  type: article
+  title: In Search of an Understandable Consensus Algorithm
+  author:
+    - Ongaro, Diego
+    - Ousterhout, John
+  date: 2014
+  page-range: 305-319
+  url:
+    value: https://www.usenix.org/conference/atc14/technical-sessions/presentation/ongaro
+    date: 2026-11-03
+  parent:
+    type: proceedings
+    title: Proceedings of the 2014 USENIX Annual Technical Conference
+    publisher:
+      name: USENIX Association
+      location: Philadelphia, PA
+
+lamport-part-time:
+  type: article
+  title: The Part-Time Parliament
+  author: Lamport, Leslie
+  date: 1998
+  page-range: 133-169
+  serial-number:
+    doi: 10.1145/279227.279229
+  parent:
+    type: periodical
+    title: ACM Transactions on Computer Systems
+    volume: 16
+    issue: 2
+
+flp-impossibility:
+  type: article
+  title: Impossibility of Distributed Consensus with One Faulty Process
+  author:
+    - Fischer, Michael J.
+    - Lynch, Nancy A.
+    - Paterson, Michael S.
+  date: 1985
+  page-range: 374-382
+  serial-number:
+    doi: 10.1145/3149.214121
+  parent:
+    type: periodical
+    title: Journal of the ACM
+    volume: 32
+    issue: 2
+
+dls-partial-synchrony:
+  type: article
+  title: Consensus in the Presence of Partial Synchrony
+  author:
+    - Dwork, Cynthia
+    - Lynch, Nancy
+    - Stockmeyer, Larry
+  date: 1988
+  page-range: 288-323
+  serial-number:
+    doi: 10.1145/42282.42283
+  parent:
+    type: periodical
+    title: Journal of the ACM
+    volume: 35
+    issue: 2
+
+garcia-bully:
+  type: article
+  title: Elections in a Distributed Computing System
+  author: Garcia-Molina, Hector
+  date: 1982
+  page-range: 48-59
+  serial-number:
+    doi: 10.1109/TC.1982.1675885
+  parent:
+    type: periodical
+    title: IEEE Transactions on Computers
+    volume: C-31
+    issue: 1

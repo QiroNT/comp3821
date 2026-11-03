@@ -28,7 +28,7 @@ This difference shapes what "speed" means for each algorithm, and is why we expe
 
 == Bully
 
-Our implementation follows the procedures given by #pc[@garcia-molina-elections]; our RPCs use the paper's procedure names (`AreYouThere`, `Halt`, `NewCoordinator`, `Ready`).
+Our implementation follows the procedures given by #pc[@garcia-bully], and our RPCs use the paper's procedure names (`AreYouThere`, `Halt`, `NewCoordinator`, `Ready`).
 Each node has a unique priority (its identifier).
 A node starting an election first asks every higher-priority node whether it is alive.
 If any replies, it defers to it; otherwise it halts every lower-priority node, announces itself as the new coordinator, and distributes the new state with `Ready`.
@@ -80,7 +80,7 @@ Raft also restricts votes to candidates whose logs are at least as up to date as
 
 == Paxos
 
-Paxos @lamport-part-time @lamport-paxos-simple reaches agreement on a single value.
+Paxos @lamport-part-time @leslie-paxos reaches agreement on a single value.
 Nodes play three roles: *proposers* suggest values, *acceptors* vote on them, and *learners* find out the outcome.
 Each proposal has a unique, increasing proposal number.
 
@@ -94,7 +94,7 @@ The rule in step 2 is what preserves this: any majority that promises to a later
 *Liveness.*
 Paxos never chooses two values, but it is not guaranteed to finish.
 Two proposers can repeatedly issue higher numbers and cancel each other's `Prepare` phase indefinitely.
-#pc[@lamport-paxos-simple] notes that a reliable way to pick a single proposer must use randomness or real time, for example timeouts.
+#pc[@leslie-paxos] notes that a reliable way to pick a single proposer must use randomness or real time, for example timeouts.
 For us this means Paxos election time should depend heavily on how proposers' timeouts are spread out, as with Raft.
 
 *Predicted cost.*
@@ -142,6 +142,7 @@ Comparing our code with the sources above revealed issues that would invalidate 
 
 #include "assessment.typ"
 #include "revised-plan.typ"
+#include "acknowledgements.typ"
 
 #show bibliography: it => if show_references { it } else { place(hide(it)) }
 #bibliography(
