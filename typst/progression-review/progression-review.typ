@@ -1,6 +1,11 @@
 #import "../lib/template.typ": template
 #import "./config.typ": *
 
+#show: template.with(
+  title: [Evaluating Leader Election Algorithms - Progress Report],
+  enum-numbering: "①",
+)
+
 #include "./coverpage.typ"
 #include "introduction.typ"
 #include "progress.typ"
