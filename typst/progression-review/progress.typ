@@ -6,10 +6,8 @@
 We have made a framework as a basis for our algorithm implementations. This is to make our algorithm code adaptable for
 different network and testing conditions, and to minimize the variance between our references and implementations.
 
-The framework provides storage for each node's state, and facilities to communicate between nodes. More specifically,
-the algorithms are provided with a `this` object for the current node, and within it, a `call()` method to invoke a
-function with another node's `this` object. We will be referring to the calling facility as Remote Procedure Calls
-(RPC).
+The framework provides storage for each node's state, and facilities to communicate between nodes. We will be referring
+to the calling facility as Remote Procedure Calls (RPC).
 
 The remote procedure call facility allows a node to send messages to other nodes and receive replies, in the form of an
 asynchronous function call. This is to mimic the request response model in HTTP, such that it allows the algorithm code
@@ -18,9 +16,9 @@ to run in any environment that supports HTTP transport. This will be useful for 
 In addition, the framework also triggers some events in the algorithms. They provide an entry point, and ways of
 notifying the algorithm of network changes.
 
-To provide an ending condition, each node is provided with a `assertLeader` method. It can be used to notify the
-framework that it has acknowledged the leader. This method is used to provide unit testing methods for our simulator,
-and will be used as the basis for time measurements.
+To provide an ending condition, each node is provided with a method to notify the framework that it has acknowledged the
+leader. This method is used to provide unit testing methods for our simulator, and will be used as the basis for time
+measurements.
 
 == Unit Testing
 
