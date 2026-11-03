@@ -15,12 +15,8 @@ The remote procedure call facility allows a node to send messages to other nodes
 asynchronous function call. This is to mimic the request response model in HTTP, such that it allows the algorithm code
 to run in any environment that supports HTTP transport. This will be useful for our real world testing in a later stage.
 
-In addition, the framework also triggers some events in the algorithms. They are,
-- `onRecovery`, for starting up a new node;
-- `onCheck`, for periodic checks as required by the algorithm; and,
-- `onTimeout`, for signaling that the leader has gone offline, and a new election should be made.
-
-This provides an entry point, and ways of notifying the algorithm of network changes.
+In addition, the framework also triggers some events in the algorithms. They provide an entry point, and ways of
+notifying the algorithm of network changes.
 
 To provide an ending condition, each node is provided with a `assertLeader` method. It can be used to notify the
 framework that it has acknowledged the leader. This method is used to provide unit testing methods for our simulator,
@@ -51,12 +47,6 @@ One difference between the pseudocode and our translation is that, while the pse
 environment, our translation does not. This means that our translation would perform worse compute vise. However, since
 we can assume that network latency should dominate the total time, this should have negotiable impact on the performance
 of the algorithm.
-
-An observation we have made so far is that, because Bully is not a consensus based algorithm, it suffers from the split
-brain problem. On a segregated network, the Bully algorithm would elect one leader for each segment, while a consensus
-based algorithm, like Raft and Paxos, would never elect a leader. This will have an impact on the usage of the
-algorithm, thus interesting, but is out of topic of this research. Some further research could be made on avoiding this
-issue with Bully.
 
 == Raft Implementation
 Since we could not find reliable sources of pseudocode to translate, we implemented the raft algorithm based on
