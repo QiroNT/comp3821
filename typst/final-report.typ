@@ -5,10 +5,13 @@
 #show: template.with(title: title, enum-numbering: "1.")
 #title-line(title)
 
+#include "./final-report/background.typ"
 #include "./final-report/code.typ"
 #include "./final-report/method.typ"
 #include "./final-report/results.typ"
 #include "./final-report/conclusion.typ"
+
+#include "./final-report/acknowledgements.typ"
 
 #if show_demos [
   #include "./final-report/demos.typ"
