@@ -2,7 +2,7 @@
 #import "./final-report/config.typ": *
 
 #let title = [Evaluating Leader Election Algorithms]
-#show: template.with(title: title, enum-numbering: "①")
+#show: template.with(title: title, enum-numbering: "1.")
 #title-line(title)
 
 #include "./final-report/code.typ"

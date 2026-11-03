@@ -3,7 +3,7 @@
 
 #show: template.with(
   title: [Evaluating Leader Election Algorithms - Progress Report],
-  enum-numbering: "①",
+  enum-numbering: "1.",
 )
 
 #include "./coverpage.typ"
