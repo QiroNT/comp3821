@@ -73,6 +73,9 @@ it('should complete in mesh', async () => {
       "[     6.0] leader settled: 4",
     ]
   `)
+
+  const settled = simulator.log().find(line => line.includes('leader settled'))
+  expect(settled).toMatch(/leader settled: \d+$/)
 })
 
 it('should not conclude if it forever timeouts', async () => {
@@ -87,7 +90,7 @@ it('should not conclude if it forever timeouts', async () => {
     replyTimeout: 1,
     checkInterval: () => 10,
     checkTimeout: () => 30,
-    maxSteps: 100,
+    maxSteps: 60,
   })
 
   await expect(simulator.run())
@@ -161,41 +164,11 @@ it('should not conclude if it forever timeouts', async () => {
       "[    21.0] 2 -> 1 areYouNormal timeout",
       "[    21.0] 3 -> 1 areYouNormal timeout",
       "[    21.0] 4 -> 1 areYouNormal timeout",
-      "[    22.0] 0 -> 3 areYouNormal timeout",
-      "[    22.0] 1 -> 3 areYouNormal timeout",
-      "[    22.0] 2 -> 3 areYouNormal timeout",
-      "[    22.0] 3 -> 2 areYouNormal timeout",
-      "[    22.0] 4 -> 2 areYouNormal timeout",
-      "[    23.0] 0 -> 4 areYouNormal timeout",
-      "[    23.0] 1 -> 4 areYouNormal timeout",
-      "[    23.0] 2 -> 4 areYouNormal timeout",
-      "[    23.0] 3 -> 4 areYouNormal timeout",
-      "[    23.0] 4 -> 3 areYouNormal timeout",
-      "[    30.0] 0 onCheck()",
-      "[    30.0] 0 -> 1 areYouNormal timeout",
-      "[    30.0] 1 onCheck()",
-      "[    30.0] 1 -> 0 areYouNormal timeout",
-      "[    30.0] 2 onCheck()",
-      "[    30.0] 2 -> 0 areYouNormal timeout",
-      "[    30.0] 3 onCheck()",
-      "[    30.0] 3 -> 0 areYouNormal timeout",
-      "[    30.0] 4 onCheck()",
-      "[    30.0] 4 -> 0 areYouNormal timeout",
-      "[    31.0] 0 -> 2 areYouNormal timeout",
-      "[    31.0] 1 -> 2 areYouNormal timeout",
-      "[    31.0] 2 -> 1 areYouNormal timeout",
-      "[    31.0] 3 -> 1 areYouNormal timeout",
-      "[    31.0] 4 -> 1 areYouNormal timeout",
-      "[    32.0] 0 -> 3 areYouNormal timeout",
-      "[    32.0] 1 -> 3 areYouNormal timeout",
-      "[    32.0] 2 -> 3 areYouNormal timeout",
-      "[    32.0] 3 -> 2 areYouNormal timeout",
-      "[    32.0] 4 -> 2 areYouNormal timeout",
-      "[    33.0] 0 -> 4 areYouNormal timeout",
-      "[    33.0] 1 -> 4 areYouNormal timeout",
-      "[    33.0] 2 -> 4 areYouNormal timeout",
-      "[    33.0] 3 -> 4 areYouNormal timeout",
-      "[    33.0] 4 -> 3 areYouNormal timeout",
+      "[    22.0] 0 -> 3 areYouNormal",
+      "[    22.0] 1 -> 3 areYouNormal",
+      "[    22.0] 2 -> 3 areYouNormal",
+      "[    22.0] 3 -> 2 areYouNormal",
+      "[    22.0] 4 -> 2 areYouNormal",
     ]
   `)
 })

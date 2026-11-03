@@ -159,7 +159,9 @@ export class Simulator {
           this.noteError(node.id, error)
         }
       },
-    )
+    ).catch((error) => {
+      this.noteError(id, error)
+    })
   }
 
   private scheduleTimeout(id: number, repeat: boolean) {
@@ -206,10 +208,12 @@ export class Simulator {
         }
         catch (error) {
           note(error instanceof AbortError ? 'aborted' : 'errored')
-          this.noteError(node.id, error)
+          this.noteError(id, error)
         }
       },
-    )
+    ).catch((error) => {
+      this.noteError(id, error)
+    })
   }
 
   private createRef(self: NodeThis, other: NodeThis): NodeRef {
