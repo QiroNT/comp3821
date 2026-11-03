@@ -6,6 +6,7 @@
 #import theoretic.presets.basic: *
 
 #import "./enum-label.typ" as el: enum-label, wrapped-enum-numbering
+#import "./header.typ": emails, title-line
 #import "./pmod.typ": pmod
 
 #let pc = citation => {
@@ -29,17 +30,11 @@
   ..rest,
 )
 
-#let emails(users, domain) = {
-  "{"
-  users.map(u => link("mailto:" + u + "@" + domain, u)).join(",")
-  "}@" + domain
-}
-
 #let template(title: [], enum-numbering: "1.", doc) = [
   #show ref: theoretic.show-ref
   #show ref: el.show-ref
 
-  #set document(title: title, author: "Edmond Cheng, Lachlan Martin, Chino Zhou")
+  #set document(title: title, author: "Edmond Cheng, Lachlan Martin, Chino Zhou, Akindu Jayatilleke, Gia Phat Bui")
   #set page(
     paper: "a4",
     numbering: "1",
@@ -48,12 +43,6 @@
   #set text(size: 11pt)
   #set enum(numbering: wrapped-enum-numbering(enum-numbering))
   #show footnote.entry: set text(size: 8pt)
-
-  #align(center, text(title, 17pt))
-  #align(center)[
-    Edmond Cheng, Lachlan Martin, Chino Zhou, Akindu Jayatilleke, Gia Phat Bui\
-    #emails(("edmond.cheng", "lachlan.t.martin", "tianxiang.zhou2", "a.jayatilleke", "g.bui"), "student.unsw.edu.au")
-  ]
 
   #doc
 ]

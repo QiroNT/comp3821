@@ -1,9 +1,62 @@
 #import "../lib/template.typ": pc
 = Progress
 
-== Framework Implementation
+== Framework
+
+We have made a framework as a basis for our algorithm implementations. This is to make our algorithm code adaptable for
+different network and testing conditions, and to minimize the variance between our references and implementations.
+
+The framework provides storage for each node's state, and facilities to communicate between nodes. More specifically,
+the algorithms are provided with a `this` object for the current node, and within it, a `call()` method to invoke a
+function with another node's `this` object. We will be referring to the calling facility as Remote Procedure Calls
+(RPC).
+
+The remote procedure call facility allows a node to send messages to other nodes and receive replies, in the form of an
+asynchronous function call. This is to mimic the request response model in HTTP, such that it allows the algorithm code
+to run in any environment that supports HTTP transport. This will be useful for our real world testing in a later stage.
+
+In addition, the framework also triggers some events in the algorithms. They are,
+- `onRecovery`, for starting up a new node;
+- `onCheck`, for periodic checks as required by the algorithm; and,
+- `onTimeout`, for signaling that the leader has gone offline, and a new election should be made.
+
+This provides an entry point, and ways of notifying the algorithm of network changes.
+
+To provide an ending condition, each node is provided with a `assertLeader` method. It can be used to notify the
+framework that it has acknowledged the leader. This method is used to provide unit testing methods for our simulator,
+and will be used as the basis for time measurements.
+
+== Unit Testing
+
+In order to unit test our algorithm implementations, we have built a deterministic simulator. It starts up a simulated
+network, and runs the algorithms until a leader consensuses is reached. The framework helps us catch bugs in our
+implementation, and get an early glance into the behaviours of the algorithms.
+
+The simulator has configurable parameters for networking latency and timeout, and configurable intervals for the
+`onCheck` / `onTimeout` events. This allows us to vary the network latency within a topology and verify that, for
+example, network conditions that are unsolvable should never reach a consensus.
+
+For debugging purposes, the simulator records a log of all messages sent between the nodes. Every test file hence
+includes a copy of their log. This way, we can visualize the interaction between nodes to spot any anomalies. It also
+allow us to track the effects of the changes we make.
 
 == Bully Implementation
+
+The pseudocode for the Bully algorithm was retrieved from #pc[@garcia-bully], then translated into our framework.
+
+The paper's pseudocode is written in an Algol-like languages, and has an event based structure. Our framework is
+designed based on this implementation, thus we performed a nearly one to one translation.
+
+One difference between the pseudocode and our translation is that, while the pseudocode assumes a parallel (threaded)
+environment, our translation does not. This means that our translation would perform worse compute vise. However, since
+we can assume that network latency should dominate the total time, this should have negotiable impact on the performance
+of the algorithm.
+
+An observation we have made so far is that, because Bully is not a consensus based algorithm, it suffers from the split
+brain problem. On a segregated network, the Bully algorithm would elect one leader for each segment, while a consensus
+based algorithm, like Raft and Paxos, would never elect a leader. This will have an impact on the usage of the
+algorithm, thus interesting, but is out of topic of this research. Some further research could be made on avoiding this
+issue with Bully.
 
 == Raft Implementation
 Since we could not find reliable sources of pseudocode to translate, we implemented the raft algorithm based on
