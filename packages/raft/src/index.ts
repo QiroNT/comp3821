@@ -26,9 +26,14 @@ enum RaftState {
 // algorithm begin
 
 // reset timeout
-const resetTimeout = fn(function resetTimeout() {
+const resetTimeout = fn(function resetTimeout(delay?: number) {
   this.clearTimeout(this.timer)
-  this.timer = this.setTimeout(onTimeout, this.params.checkTimeout)
+  if (delay) {
+    this.timer = this.setTimeout(onTimeout, delay)
+  }
+  else {
+    this.timer = this.setTimeout(onTimeout, this.params.checkTimeout)
+  }
 })
 
 // A candidate calls this to request a vote
@@ -40,6 +45,9 @@ const requestVote = rpc<boolean>()(async function requestVotes({ sender, reply }
   }
   if (this.state === RaftState.LEADER) {
     // TODO: randomised backoff
+    this.state = RaftState.FOLLOWER
+    const delay = Math.floor(100 + Math.random() * 250) // range [100, 350]
+    resetTimeout.call(this, delay)
   }
   if (this.state !== RaftState.FOLLOWER) {
     await reply(false)
