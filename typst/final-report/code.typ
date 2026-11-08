@@ -19,15 +19,11 @@ Some parts of the local state are maintained by the framework itself. They are a
 - `this.id` contains an integer ID that is unique across all nodes in the network.
 - `this.network` is an array of all the other nodes in the network, alive or not. The list stays constant for the
   duration of the election.
+- `this.config` contains the `params` field for the algorithm.
 - `this.abortOutstanding` is a function that when called, cancels all other functions on the node currently waiting on
   an `await` point.
-
-  This function takes a parameter `tag`, which specifies what type of pending functions are aborted. By default it is
-  `rpc`, meaning that only in flight rpc responses are aborted. Available tags are `rpc`, `onCheck`, and `onTimeout`.
-- `this.scheduleCheck` schedules the algorithm's `onCheck` function to be called on the current node. This function
-  takes in a `repeat` parameter, to specify whether `onCheck` should be called on an interval, or just once.
-- `this.scheduleTimeout` schedules the algorithm's `onTimeout` function to be called on the current node. This function
-  also takes in a `repeat` parameter, to specify whether `onTimeout` should be called on an interval, or just once.
+- `this.setTimeout` schedules a function to be called after some delay, returning a handle to the timer.
+- `this.clearTimeout` removes a scheduled timer.
 - `this.assertLeader` is a function which signals to the framework that the current node thinks this node is the leader.
   This is used as a stop condition, when all nodes have called `assertLeader` with the same leader node.
 - `this.callAll` is a utility function that broadcasts an RPC to an array of nodes.

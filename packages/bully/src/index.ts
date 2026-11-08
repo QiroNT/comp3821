@@ -1,7 +1,7 @@
 import type { Algorithm } from 'framework'
 import { fn, rpc } from 'framework'
 
-/* eslint prefer-arrow-callback: "off" */
+/* eslint prefer-arrow-callback: "off", ts/no-use-before-define: "off" */
 // algorithm start
 
 /**
@@ -15,7 +15,13 @@ const areYouThere = rpc()(async function areYouThere({ reply }) {
 /**
  * This procedure is called by coordinators to discover the state of a node.
  */
-const areYouNormal = rpc<boolean>()(async function areYouNormal({ reply }) {
+const areYouNormal = rpc<boolean>()(async function areYouNormal({ sender, reply }) {
+  // Reset the coordinator timeout.
+  if (this.coordinator === sender) {
+    this.clearTimeout(this.timeoutTimer)
+    this.timeoutTimer = this.setTimeout(onTimeout, this.params.checkTimeout)
+  }
+
   if (this.state === 'normal') {
     await reply(true)
   }
@@ -110,21 +116,11 @@ const election = fn(async function election() {
 })
 
 /**
- * This procedure is automatically called by the operating system when a node
- * starts up after a failure.
- */
-const onRecovery = fn(async function onRecovery() {
-  this.scheduleCheck(true)
-  this.scheduleTimeout(true)
-
-  delete this.haltedBy
-  await election.call(this)
-})
-
-/**
- * This procedure is called periodically by the operating system.
+ * This procedure is called periodically.
  */
 const onCheck = fn(async function onCheck() {
+  this.setTimeout(onCheck, this.params.checkInterval)
+
   if (this.state === 'normal' && this.coordinator === this) {
     // I am coordinator. Check if everyone else is normal.
     for (const node of this.network) {
@@ -141,10 +137,16 @@ const onCheck = fn(async function onCheck() {
 })
 
 /**
- * This procedure is called automatically when the node has not heard from the
- * coordinator in a "long" time.
+ * This procedure is called when the node has not heard from the coordinator in
+ * a "long" time.
  */
 const onTimeout = fn(async function onTimeout() {
+  this.timeoutTimer = this.setTimeout(onTimeout, this.params.checkTimeout)
+
+  // Skip if we are the coordinator.
+  if (this.coordinator === this)
+    return
+
   if (this.state === 'normal' || this.state === 'reorganization') {
     // Check if coordinator is up.
     const { status } = await this.coordinator.call(areYouThere)
@@ -157,9 +159,21 @@ const onTimeout = fn(async function onTimeout() {
   }
 })
 
+/**
+ * This procedure is automatically called by the operating system when a node
+ * starts up after a failure.
+ */
+const onStart = fn(async function onStart() {
+  this.setTimeout(onCheck, this.params.checkInterval)
+  this.timeoutTimer = this.setTimeout(onTimeout, this.params.checkTimeout)
+
+  delete this.haltedBy
+  await election.call(this)
+})
+
 // algorithm end
 
 export const bully: Algorithm = {
   rpcs: [areYouNormal, areYouThere, halt, newCoordinator, ready],
-  events: { onCheck, onRecovery, onTimeout },
+  events: { onStart },
 }

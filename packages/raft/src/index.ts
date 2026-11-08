@@ -1,7 +1,7 @@
 import type { Algorithm } from 'framework'
 import { fn, rpc } from 'framework'
 
-/* eslint prefer-arrow-callback: "off" */
+/* eslint prefer-arrow-callback: "off", ts/no-use-before-define: "off" */
 
 // The node's expected properties/attributes:
 /*
@@ -24,6 +24,12 @@ enum RaftState {
 }
 
 // algorithm begin
+
+// reset timeout
+const resetTimeout = fn(function resetTimeout() {
+  this.clearTimeout(this.timer)
+  this.timer = this.setTimeout(onTimeout, this.params.checkTimeout)
+})
 
 // A candidate calls this to request a vote
 const requestVote = rpc<boolean>()(async function requestVotes({ sender, reply }) {
@@ -58,7 +64,7 @@ const appendEntry = rpc<boolean>()(async function appendEntry({ sender, reply })
   }
 
   // reset timeout
-  this.scheduleTimeout(true)
+  resetTimeout.call(this)
 
   await reply(true)
 })
@@ -92,7 +98,7 @@ const election = fn(async function election() {
     this.state = RaftState.CANDIDATE
   }
   // no matter the result, a timeout starts
-  this.scheduleTimeout(true)
+  resetTimeout.call(this)
 })
 
 const onCheck = fn(async function onCheck() {
@@ -111,18 +117,10 @@ const onCheck = fn(async function onCheck() {
   }
 })
 
-// When the system starts, or when the node recovers
-const onRecovery = fn(async function onRecovery() {
-  // initialise all the expected attributes
-  // TODO ^^^
-  this.state = RaftState.FOLLOWER
-  this.term = 0
-  // the node will now wait to timeout.
-  this.scheduleTimeout(true)
-})
-
 // a generic timeout event
 const onTimeout = fn(async function onTimeout() {
+  resetTimeout.call(this)
+
   if (this.state === RaftState.FOLLOWER) {
     this.state = RaftState.CANDIDATE
     election.call(this)
@@ -138,9 +136,19 @@ const onTimeout = fn(async function onTimeout() {
   }
 })
 
+// When the system starts, or when the node recovers
+const onStart = fn(async function onStart() {
+  // initialise all the expected attributes
+  // TODO ^^^
+  this.state = RaftState.FOLLOWER
+  this.term = 0
+  // the node will now wait to timeout.
+  resetTimeout.call(this)
+})
+
 // algorithm end
 
 export const raft: Algorithm = {
   rpcs: [],
-  events: { onCheck, onRecovery, onTimeout },
+  events: { onStart },
 }

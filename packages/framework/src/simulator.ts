@@ -7,9 +7,7 @@ interface Scheduled {
   run: () => void
 }
 
-type AbortableTag = 'rpc' | 'onCheck' | 'onTimeout'
 interface Abortable {
-  tag: AbortableTag
   abort: () => void
 }
 
@@ -18,9 +16,9 @@ class AbortError extends Error { }
 interface SimulatorConfig {
   algorithm: Algorithm
   network: Network
-  replyTimeout: number
-  checkInterval: () => number
-  checkTimeout: () => number
+  params: Record<string, any> & {
+    replyTimeout: number
+  }
   maxSteps: number
 }
 
@@ -32,7 +30,8 @@ export class Simulator {
 
   private queue: Scheduled[] = []
   private inFlight = new Map<number, Set<Abortable>>()
-  private msgCounter = new Map<number, Map<number, number>>()
+  private timers = new Map<number, Set<number>>()
+  private timerHandles = 0
   private leaders = new Map<number, number>()
 
   private finished = false
@@ -60,6 +59,7 @@ export class Simulator {
 
     this.queue = []
     this.inFlight = new Map()
+    this.timers = new Map()
     this.leaders = new Map()
 
     this.finished = false
@@ -70,20 +70,16 @@ export class Simulator {
     return {
       id,
       network: [],
-      abortOutstanding: () => {
-        return this.abortOutstanding(id)
-      },
+      params: this.config.params,
+      abortOutstanding: () => this.abortOutstanding(id),
       assertLeader: (leader) => {
         this.recordLeader(id, leader)
       },
 
-      scheduleCheck: (repeat) => {
-        this.abortOutstanding(id, 'onCheck')
-        this.scheduleCheck(id, repeat)
-      },
-      scheduleTimeout: (repeat) => {
-        this.abortOutstanding(id, 'onTimeout')
-        this.scheduleTimeout(id, repeat)
+      setTimeout: (f, delay) => this.setTimeout(id, f, delay),
+      clearTimeout: (handle) => {
+        if (handle !== undefined)
+          this.timers.get(id)?.delete(handle)
       },
 
       callAll: (nodes, rpc, ...args) =>
@@ -91,18 +87,16 @@ export class Simulator {
     }
   }
 
-  private abortOutstanding(id: number, tag: AbortableTag = 'rpc'): number {
+  private abortOutstanding(id: number): number {
     const pending = this.inFlight.get(id)
     if (!pending?.size)
       return 0
 
     let aborted = 0
     for (const abortable of pending) {
-      if (abortable.tag === tag) {
-        abortable.abort()
-        pending.delete(abortable)
-        aborted++
-      }
+      abortable.abort()
+      pending.delete(abortable)
+      aborted++
     }
 
     return aborted
@@ -125,95 +119,45 @@ export class Simulator {
     }
   }
 
-  private scheduleCheck(id: number, repeat: boolean) {
-    this.scheduleAbortable(
-      id,
-      this.time + this.config.checkInterval(),
-      'onCheck',
-      async (aborted) => {
-        if (aborted)
-          return
+  private setTimeout(
+    id: number,
+    f: (this: NodeThis) => MaybePromise<void>,
+    delay: number,
+  ): number {
+    const handle = ++this.timerHandles
 
-        const node = this.nodes[id]
-        if (!node)
-          return
+    let pending = this.timers.get(id)
+    if (!pending) {
+      pending = new Set()
+      this.timers.set(id, pending)
+    }
+    pending.add(handle)
 
-        if (repeat)
-          this.scheduleCheck(id, repeat)
+    this.at(this.time + delay, async () => {
+      if (!pending.delete(handle))
+        return
 
-        const onCheck = this.config.algorithm.events?.onCheck
-        if (!onCheck)
-          return
+      const node = this.nodes[id]
+      if (!node)
+        return
 
-        const logLine = this.logs.length
-        this.logs.push(`[${this.timestamp()}] ${id} onCheck()`)
-        const note = (text: string) => {
-          this.logs[logLine] += ` ${text}`
-        }
+      const logLine = this.logs.length
+      const name = f.name || 'timeout'
+      this.logs.push(`[${this.timestamp()}] ${id} ${name}`)
+      const note = (text: string) => {
+        this.logs[logLine] += ` ${text}`
+      }
 
-        try {
-          await onCheck.call(node)
-        }
-        catch (error) {
-          note(error instanceof AbortError ? 'aborted' : 'errored')
-          this.noteError(node.id, error)
-        }
-      },
-    ).catch((error) => {
-      this.noteError(id, error)
+      try {
+        await f.call(node)
+      }
+      catch (error) {
+        note(error instanceof AbortError ? 'aborted' : 'errored')
+        this.noteError(id, error)
+      }
     })
-  }
 
-  private scheduleTimeout(id: number, repeat: boolean) {
-    const leader = this.leaders.get(id)
-    const msgCount = leader === undefined ? 0 : this.msgCounter.get(id)?.get(leader) ?? 0
-
-    this.scheduleAbortable(
-      id,
-      this.time + this.config.checkTimeout(),
-      'onTimeout',
-      async (aborted) => {
-        if (aborted)
-          return
-
-        const node = this.nodes[id]
-        if (!node)
-          return
-
-        if (repeat)
-          this.scheduleTimeout(id, repeat)
-
-        // a leader doesn't time out on itself, and learning of a new leader
-        // counts as hearing from one
-        const newLeader = this.leaders.get(id)
-        if (newLeader === id || newLeader !== leader)
-          return
-
-        const newMsgCount = leader === undefined ? 0 : this.msgCounter.get(id)?.get(leader) ?? 0
-        if (newMsgCount > msgCount)
-          return
-
-        const onTimeout = this.config.algorithm.events?.onTimeout
-        if (!onTimeout)
-          return
-
-        const logLine = this.logs.length
-        this.logs.push(`[${this.timestamp()}] ${id} onTimeout()`)
-        const note = (text: string) => {
-          this.logs[logLine] += ` ${text}`
-        }
-
-        try {
-          await onTimeout.call(node)
-        }
-        catch (error) {
-          note(error instanceof AbortError ? 'aborted' : 'errored')
-          this.noteError(id, error)
-        }
-      },
-    ).catch((error) => {
-      this.noteError(id, error)
-    })
+    return handle
   }
 
   private createRef(self: NodeThis, other: NodeThis): NodeRef {
@@ -265,7 +209,7 @@ export class Simulator {
 
     // schedule a timeout response
     const timeout = this.schedule(
-      this.time + this.config.replyTimeout,
+      this.time + this.config.params.replyTimeout,
       () => ({ target, status: 'timeout' } satisfies RpcResponse<T>),
     )
 
@@ -273,16 +217,7 @@ export class Simulator {
     const response = this.scheduleAbortable(
       from.id,
       this.time + Math.max(0, latency),
-      'rpc',
-      () => {
-        let counts = this.msgCounter.get(to.id)
-        if (!counts) {
-          counts = new Map()
-          this.msgCounter.set(to.id, counts)
-        }
-        counts.set(from.id, (counts.get(from.id) ?? 0) + 1)
-        return f(sender, target)
-      },
+      () => f(sender, target),
     )
 
     const ret = Promise.race([timeout, response])
@@ -312,7 +247,6 @@ export class Simulator {
   private scheduleAbortable<T>(
     id: number,
     at: number,
-    tag: AbortableTag,
     f: (aborted: boolean) => T,
   ): Promise<Awaited<T>> {
     const { promise, resolve, reject } = Promise.withResolvers<Awaited<T>>()
@@ -320,7 +254,6 @@ export class Simulator {
     let settled = false
 
     const abortable = {
-      tag,
       abort: () => {
         if (settled)
           return
@@ -383,10 +316,10 @@ export class Simulator {
   async run() {
     this.reset()
 
-    const { onRecovery } = this.config.algorithm.events ?? {}
-    if (onRecovery) {
+    const { onStart } = this.config.algorithm.events ?? {}
+    if (onStart) {
       for (const node of this.nodes)
-        this.startNode(node, onRecovery)
+        this.startNode(node, onStart)
     }
 
     await this.flush()
@@ -412,10 +345,10 @@ export class Simulator {
 
   private async startNode(
     node: NodeThis,
-    f: (this: NodeThis) => MaybePromise<void>,
+    f: (this: NodeThis, config: Record<string, any>) => MaybePromise<void>,
   ) {
     try {
-      await f.call(node)
+      await f.call(node, this.config.params)
     }
     catch (error) {
       this.noteError(node.id, error)
