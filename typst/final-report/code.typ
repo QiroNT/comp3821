@@ -63,3 +63,4 @@ The Bully algorithm presented by #pc[@garcia-bully] is transcribed as follows.
 == Paxos
 
 We have adapted the plain English and pseudocode described by #pc[@roohitavaf-paxos] for our concrete implementations.
+Additionally, while Paxos is not specifically designed for leader election, as a consensus algorithm, it can be modified to come to a consensus for a leader.
