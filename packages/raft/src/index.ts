@@ -32,6 +32,9 @@ const requestVote = rpc<boolean>()(async function requestVotes({ sender, reply }
     this.voted = false
     this.state = RaftState.FOLLOWER
   }
+  if (this.state === RaftState.LEADER) {
+    // TODO: randomised backoff
+  }
   if (this.state !== RaftState.FOLLOWER) {
     await reply(false)
     return
@@ -64,7 +67,6 @@ const appendEntry = rpc<boolean>()(async function appendEntry({ sender, reply })
 })
 
 const election = fn(async function election() {
-  // TODO: ELECTION!
   this.term += 1
 
   // vote for self
