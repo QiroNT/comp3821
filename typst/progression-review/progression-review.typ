@@ -1,4 +1,4 @@
-#import "../lib/template.typ": template
+#import "../lib/template.typ": template, pc
 #import "./config.typ": *
 
 #show: template.with(

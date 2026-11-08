@@ -1,29 +1,3 @@
-# example pulled from another assignment
-alonso-eoap:
-  type: article
-  title: Effectiveness of a Peer Mentoring on University Dropout and Academic Performance
-  author:
-    - Alonso, Miguel A.
-    - González-Ortiz-de-Zárate, Aitana
-    - Ángeles Gómez-Flechoso, M.
-    - Castrillón, Marco
-  date: 2024
-  page-range: 29-37
-  url:
-    value: https://doi.org/10.5093/psed2024a5
-    date: 2025-07-16
-  serial-number:
-    issn: 1135-755X
-  abstract: Mentoring programs have been proposed to reduce dropout and increase academic performance. We analyzed the effect of peer mentoring on university dropout and academic performance in the context of Spain. We applied a quasi-experimental posttest-only control group design with 3,774 students (mentees, n = 1,887; control, n = 1,887). Mentees had participated in a peer mentoring program. We apply the student’s t-test, Cohen’s d, phi statistic, and chi-square statistic. Mentees exhibited lower dropout than controls and showed higher academic performance regardless of the area of knowledge. Results support the implementation of mentoring programs in Spanish universities with the goal of reducing student dropout and increasing academic performance. The research provides empirical evidence for theory building in higher education studies, developmental relationships, and integration programs.
-  parent:
-    type: periodical
-    title: 'Psicología Educativa: Revista de los Psicólogos de la Educación'
-    publisher:
-      name: Colegio Oficial de Psicólogos de Madrid
-      location: Madrid
-    issue: 1
-    volume: 30
-
 # Real Sources
 roohitavaf-paxos:
   type: article
@@ -34,8 +8,98 @@ roohitavaf-paxos:
     value: https://www.mydistributed.systems/2021/04/paxos.html
     date: 2026-10-17
 
+leslie-paxos:
+  type: article
+  title: Paxos Made Simple
+  author: Lamport, Leslie
+  date: 2001-12
+  page-range: 51-58
+  url:
+    value: https://lamport.azurewebsites.net/pubs/paxos-simple.pdf
+    date: 2026-10-17
+  parent:
+    type: periodical
+    title: ACM SIGACT News (Distributed Computing Column)
+    volume: 32
+    issue: 4
+
 howard-raft:
   type: report
   title: 'ARC: Analysis of Raft Consensus'
   author: Howard, Heidi
-  date: 2014-06
+  date: 2014-07
+  number: UCAM-CL-TR-857
+  serial-number:
+    doi: 10.48456/tr-857
+  url:
+    value: https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-857.pdf
+    date: 2026-11-03
+  publisher:
+    name: University of Cambridge, Computer Laboratory
+    location: Cambridge
+
+ongaro-raft:
+  type: article
+  title: In Search of an Understandable Consensus Algorithm
+  author:
+    - Ongaro, Diego
+    - Ousterhout, John
+  date: 2014
+  page-range: 305-319
+  url:
+    value: https://www.usenix.org/conference/atc14/technical-sessions/presentation/ongaro
+    date: 2026-11-03
+  parent:
+    type: proceedings
+    title: Proceedings of the 2014 USENIX Annual Technical Conference
+    publisher:
+      name: USENIX Association
+      location: Philadelphia, PA
+
+lamport-part-time:
+  type: article
+  title: The Part-Time Parliament
+  author: Lamport, Leslie
+  date: 1998
+  page-range: 133-169
+  serial-number:
+    doi: 10.1145/279227.279229
+  parent:
+    type: periodical
+    title: ACM Transactions on Computer Systems
+    volume: 16
+    issue: 2
+
+flp-impossibility:
+  type: article
+  title: Impossibility of Distributed Consensus with One Faulty Process
+  author:
+    - Fischer, Michael J.
+    - Lynch, Nancy A.
+    - Paterson, Michael S.
+  date: 1985
+  page-range: 374-382
+  serial-number:
+    doi: 10.1145/3149.214121
+  parent:
+    type: periodical
+    title: Journal of the ACM
+    volume: 32
+    issue: 2
+
+dls-partial-synchrony:
+  type: article
+  title: Consensus in the Presence of Partial Synchrony
+  author:
+    - Dwork, Cynthia
+    - Lynch, Nancy
+    - Stockmeyer, Larry
+  date: 1988
+  page-range: 288-323
+  serial-number:
+    doi: 10.1145/42282.42283
+  parent:
+    type: periodical
+    title: Journal of the ACM
+    volume: 35
+    issue: 2
