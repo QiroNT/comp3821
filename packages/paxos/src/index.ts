@@ -37,15 +37,6 @@ const leanerDecide = rpc()(async function leanerDecide({ sender }, node_index: n
   }
 })
 
-// Also runs on start, use to init state
-const onRecovery = fn(async function onRecovery() {
-  this.proposer = new Proposer()
-  this.acceptor = new Acceptor()
-  this.learner = new Listener()
-  // the node will now wait to timeout.
-  this.scheduleTimeout(true)
-})
-
 const proposerAccepted = rpc()(async function proposerAccepted({ }, promise_number: number) {
   if (promise_number !== this.proposer.proposal_number)
     return
@@ -111,6 +102,11 @@ const acceptorPrepare = rpc()(async function acceptorPrepare({ sender }, promise
 
 // Runs when any node times out
 const onTimeout = fn(async function onTimeout() {
+  if (this.learner.decided_value !== -1)
+    return // Stop once we've learned a leader.
+
+  this.setTimeout(onTimeout, this.params.checkTimeout)
+
   this.proposer.proposal_number = globalProposalNumber++
   this.proposer.value = this.id
   this.proposer.acknowledgements = 0
@@ -119,7 +115,16 @@ const onTimeout = fn(async function onTimeout() {
   this.callAll(this.network, acceptorPrepare, this.proposer.proposal_number)
 })
 
+// Also runs on start, use to init state
+const onStart = fn(async function onStart() {
+  this.proposer = new Proposer()
+  this.acceptor = new Acceptor()
+  this.learner = new Listener()
+  // the node will now wait to timeout.
+  this.setTimeout(onTimeout, this.params.checkTimeout)
+})
+
 export const paxos: Algorithm = {
   rpcs: [],
-  events: { onRecovery, onTimeout },
+  events: { onStart },
 }

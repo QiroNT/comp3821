@@ -28,9 +28,7 @@ export function rpc<R = undefined>() {
 }
 
 export function fn<
-  A extends unknown[],
-  R,
-  F extends (this: NodeThis, ...args: A) => R,
+  F extends (this: NodeThis, ...args: any[]) => any,
 >(f: F): F {
   return f
 }
@@ -38,11 +36,13 @@ export function fn<
 export type NodeThis = Record<string, any> & {
   id: number
   network: NodeRef[]
+  params: Record<string, any>
+
   abortOutstanding: () => number
   assertLeader: (leader?: NodeRef | NodeThis) => void
 
-  scheduleCheck: (repeat: boolean) => void
-  scheduleTimeout: (repeat: boolean) => void
+  setTimeout: (f: (this: NodeThis) => MaybePromise<void>, delay: number) => number
+  clearTimeout: (handle?: number) => void
 
   callAll: <A extends unknown[], R>(
     nodes: NodeRef[],
@@ -60,9 +60,7 @@ export type NodeRef = Record<string, any> & {
 }
 
 export interface AlgorithmEvents {
-  onCheck?: (this: NodeThis) => MaybePromise<void>
-  onRecovery?: (this: NodeThis) => MaybePromise<void>
-  onTimeout?: (this: NodeThis) => MaybePromise<void>
+  onStart?: (this: NodeThis, config: Record<string, any>) => MaybePromise<void>
 }
 
 export interface Algorithm {
