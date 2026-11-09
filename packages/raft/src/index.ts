@@ -37,9 +37,9 @@ const resetTimeout = fn(function resetTimeout(delay?: number) {
 })
 
 // A candidate calls this to request a vote
-const requestVote = rpc<boolean>()(async function requestVotes({ sender, reply }) {
+const requestVote = rpc<boolean>()(async function requestVotes({ sender, reply }, currTerm: number) {
   // a node discovers that this is a new term
-  if (this.term < sender.term) {
+  if (this.term < currTerm) {
     this.voted = false
     this.state = RaftState.FOLLOWER
     this.term = sender.term
@@ -66,12 +66,12 @@ const requestVote = rpc<boolean>()(async function requestVotes({ sender, reply }
 // the heartbeat function called by a coordinator
 // reply = True is an ACK
 // reply = False or no response is a NACK
-const appendEntry = rpc<boolean>()(async function appendEntry({ sender, reply }) {
-  // a node will step down if term out of date
-  if (this.term <= sender.term) {
+const appendEntry = rpc<boolean>()(async function appendEntry({ sender, reply }, currTerm: number) {
+  // a node will step down if it receives a heartbeat from at least its perceived term
+  if (this.term <= currTerm) {
     this.state = RaftState.FOLLOWER
     this.coordinator = sender
-    this.term = sender.term
+    this.term = currTerm
     this.voted = false
     this.assertLeader(sender)
   }
@@ -91,7 +91,7 @@ const election = fn(async function election() {
 
   // request votes from every node
   for (const node of this.network) {
-    const { status, response } = await node.call(requestVote)
+    const { status, response } = await node.call(requestVote, this.term)
     if (status === 'timeout') {
       // TODO: Should we assume that there is now one less voter?
     }
@@ -102,7 +102,7 @@ const election = fn(async function election() {
   if (this.votes > this.network.length / 2) {
     this.state = RaftState.LEADER
     // send initial heartbeat messages
-    this.callAll(this.network, appendEntry)
+    this.callAll(this.network, appendEntry, this.term)
     this.coordinator = this
     this.assertLeader(this)
   }
@@ -144,7 +144,7 @@ const onTimeout = fn(async function onTimeout() {
   if (this.state === RaftState.LEADER) {
     // send heartbeat pulses
     for (const node of this.network) {
-      await node.call(appendEntry)
+      await node.call(appendEntry, this.term)
     }
   }
 })
