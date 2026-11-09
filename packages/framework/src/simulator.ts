@@ -164,22 +164,35 @@ export class Simulator {
     return {
       id: other.id,
       call: (rpc, ...args) => {
-        const label = rpc.name || 'rpc'
-        // eslint-disable-next-line no-async-promise-executor
-        return this.send(self, other, label, sender => new Promise(async (resolve) => {
-          const reply = (response: any) =>
-            this.send(other, self, `${label} reply`, (sender, target) => {
-              resolve({ target: sender, status: 'ok', response })
-              return { target, status: 'ok', response: undefined }
-            })
+        const name = rpc.name || 'rpc'
+        const strArgs = args.map(a => JSON.stringify(a)).join(', ')
+        const label = `${name}(${strArgs})`
 
-          try {
-            await rpc.call(other, { sender, reply }, ...args)
-          }
-          catch (error) {
-            this.noteError(other.id, error)
-          }
-        }))
+        return this.send(
+          self,
+          other,
+          label,
+          // eslint-disable-next-line no-async-promise-executor
+          sender => new Promise(async (resolve) => {
+            const reply = (response: any) =>
+              this.send(
+                other,
+                self,
+                `${name} reply(${JSON.stringify(response)})`,
+                (sender, target) => {
+                  resolve({ target: sender, status: 'ok', response })
+                  return { target, status: 'ok', response: undefined }
+                },
+              )
+
+            try {
+              await rpc.call(other, { sender, reply }, ...args)
+            }
+            catch (error) {
+              this.noteError(other.id, error)
+            }
+          }),
+        )
       },
     }
   }
