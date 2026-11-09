@@ -7,7 +7,7 @@ export interface Request<R> {
     : (reply: R) => Promise<RpcResponse<undefined>>
 }
 
-export type Rpc<A extends unknown[], R> = (
+export type Rpc<A extends any[], R> = (
   this: NodeThis,
   context: Request<R>,
   ...args: A
@@ -24,7 +24,7 @@ export type RpcResponse<T> = {
 })
 
 export function rpc<R = undefined>() {
-  return <A extends unknown[]>(f: Rpc<A, R>) => f
+  return <A extends any[]>(f: Rpc<A, R>) => f
 }
 
 export function fn<
@@ -44,7 +44,7 @@ export type NodeThis = Record<string, any> & {
   setTimeout: (f: (this: NodeThis) => MaybePromise<void>, delay: number) => number
   clearTimeout: (handle?: number) => void
 
-  callAll: <A extends unknown[], R>(
+  callAll: <A extends any[], R>(
     nodes: NodeRef[],
     rpc: Rpc<A, R>,
     ...args: A
@@ -53,7 +53,7 @@ export type NodeThis = Record<string, any> & {
 
 export type NodeRef = Record<string, any> & {
   id: number
-  call: <A extends unknown[], R>(
+  call: <A extends any[], R>(
     rpc: Rpc<A, R>,
     ...args: A
   ) => Promise<RpcResponse<R>>
@@ -64,6 +64,6 @@ export interface AlgorithmEvents {
 }
 
 export interface Algorithm {
-  rpcs?: Rpc<unknown[], unknown>[]
+  rpcs?: Rpc<any[], any>[]
   events?: AlgorithmEvents
 }
