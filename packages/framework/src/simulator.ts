@@ -1,6 +1,7 @@
 import type { Algorithm, NodeRef, NodeThis, RpcResponse } from './algorithm'
 import type { Network } from './network'
 import type { MaybePromise } from './util'
+import { Random } from 'random'
 
 interface Scheduled {
   time: number
@@ -20,6 +21,7 @@ interface SimulatorConfig {
     replyTimeout: number
   }
   maxSteps: number
+  seed?: number | string
 }
 
 export class Simulator {
@@ -81,6 +83,8 @@ export class Simulator {
         if (handle !== undefined)
           this.timers.get(id)?.delete(handle)
       },
+
+      random: new Random(`${this.config.seed}/${id}`),
 
       callAll: (nodes, rpc, ...args) =>
         Promise.all(nodes.map(target => target.call(rpc, ...args))),

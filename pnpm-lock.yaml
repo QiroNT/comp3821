@@ -12,6 +12,9 @@ catalogs:
     eslint:
       specifier: ^10.13.0
       version: 10.13.0
+    random:
+      specifier: ^5.5.1
+      version: 5.5.1
     typescript:
       specifier: ^6.0.3
       version: 6.0.3
@@ -42,7 +45,11 @@ importers:
         specifier: workspace:*
         version: link:../framework
 
-  packages/framework: {}
+  packages/framework:
+    dependencies:
+      random:
+        specifier: 'catalog:'
+        version: 5.5.1
 
   packages/paxos:
     dependencies:
@@ -1475,6 +1482,10 @@ packages:
   quote-js-string@0.1.0:
     resolution: {integrity: sha512-Y3NoRtprEEZQD8RfxMCfS0ZTqc4e+i18OrXEXAvpM6TfC/3y+0L5rNbZiSnbBBEkDfFzbpd8o+cE8q3/anjMGA==}
     engines: {node: '>=22'}
+
+  random@5.5.1:
+    resolution: {integrity: sha512-2TIJKf/BGjy0FGeZaan2+a/vq37afbSyscquADMFC13KBjFmg+10T/TkACpP9GMHfbEruKYbHqq0rjCA9x8gNA==}
+    engines: {node: '>=20'}
 
   refa@0.12.1:
     resolution: {integrity: sha512-J8rn6v4DBb2nnFqkqwy6/NnTYMcgLA+sLr0iIO41qpv0n+ngb7ksag2tMRl0inb1bbO/esUwzW1vbJi7K0sI0g==}
@@ -3321,6 +3332,8 @@ snapshots:
   quansync@0.2.11: {}
 
   quote-js-string@0.1.0: {}
+
+  random@5.5.1: {}
 
   refa@0.12.1:
     dependencies:

@@ -1,3 +1,4 @@
+import type { Random } from 'random'
 import type { MaybePromise } from './util'
 
 export interface Request<R> {
@@ -43,6 +44,8 @@ export type NodeThis = Record<string, any> & {
 
   setTimeout: (f: (this: NodeThis) => MaybePromise<void>, delay: number) => number
   clearTimeout: (handle?: number) => void
+
+  random: Random
 
   callAll: <A extends any[], R>(
     nodes: NodeRef[],

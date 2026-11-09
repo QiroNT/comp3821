@@ -14,5 +14,6 @@ packages:
 catalog:
   '@antfu/eslint-config': ^9.5.1
   eslint: ^10.13.0
+  random: ^5.5.1
   typescript: ^6.0.3
   vitest: ^5.0.5

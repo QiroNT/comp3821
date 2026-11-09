@@ -32,23 +32,22 @@ const resetTimeout = fn(function resetTimeout(delay?: number) {
     this.timer = this.setTimeout(onTimeout, delay)
   }
   else {
-    this.timer = this.setTimeout(onTimeout, this.params.checkTimeout)
+    this.timer = this.setTimeout(onTimeout, this.params.checkTimeout + this.random.int(10, 35))
   }
 })
 
 // A candidate calls this to request a vote
-const requestVote = rpc<boolean>()(async function requestVotes({ sender, reply }, currTerm: number) {
+const requestVote = rpc<boolean>()(async function requestVotes({ reply }, currTerm: number) {
   // a node discovers that this is a new term
   if (this.term < currTerm) {
     this.voted = false
     this.state = RaftState.FOLLOWER
-    this.term = sender.term
+    this.term = currTerm
   }
   if (this.state === RaftState.LEADER) {
     // TODO: randomised backoff
     this.state = RaftState.FOLLOWER
-    const delay = Math.floor(10 + Math.random() * 25) // range [10, 35] units of time
-    resetTimeout.call(this, delay)
+    resetTimeout.call(this, this.random.int(10, 35))
   }
   if (this.state !== RaftState.FOLLOWER) {
     await reply(false)
@@ -138,10 +137,10 @@ const onTimeout = fn(async function onTimeout() {
     this.state = RaftState.CANDIDATE
     election.call(this)
   }
-  if (this.state === RaftState.CANDIDATE) {
+  else if (this.state === RaftState.CANDIDATE) {
     election.call(this)
   }
-  if (this.state === RaftState.LEADER) {
+  else if (this.state === RaftState.LEADER) {
     // send heartbeat pulses
     for (const node of this.network) {
       await node.call(appendEntry, this.term)
