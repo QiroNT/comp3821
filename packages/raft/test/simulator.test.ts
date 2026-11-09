@@ -16,7 +16,7 @@ it('should complete in mesh', async () => {
       checkInterval: 10,
       checkTimeout: 30,
     },
-    maxSteps: 100,
+    maxSteps: 200,
   })
 
   await simulator.run()

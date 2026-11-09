@@ -42,11 +42,12 @@ const requestVote = rpc<boolean>()(async function requestVotes({ sender, reply }
   if (this.term < sender.term) {
     this.voted = false
     this.state = RaftState.FOLLOWER
+    this.term = sender.term
   }
   if (this.state === RaftState.LEADER) {
     // TODO: randomised backoff
     this.state = RaftState.FOLLOWER
-    const delay = Math.floor(100 + Math.random() * 250) // range [100, 350]
+    const delay = Math.floor(10 + Math.random() * 25) // range [10, 35] units of time
     resetTimeout.call(this, delay)
   }
   if (this.state !== RaftState.FOLLOWER) {
@@ -67,11 +68,12 @@ const requestVote = rpc<boolean>()(async function requestVotes({ sender, reply }
 // reply = False or no response is a NACK
 const appendEntry = rpc<boolean>()(async function appendEntry({ sender, reply }) {
   // a node will step down if term out of date
-  if (this.term < sender.term) {
+  if (this.term <= sender.term) {
     this.state = RaftState.FOLLOWER
     this.coordinator = sender
     this.term = sender.term
     this.voted = false
+    this.assertLeader(sender)
   }
 
   // reset timeout
@@ -102,6 +104,7 @@ const election = fn(async function election() {
     // send initial heartbeat messages
     this.callAll(this.network, appendEntry)
     this.coordinator = this
+    this.assertLeader(this)
   }
   else {
     // remain a candidate
@@ -111,21 +114,21 @@ const election = fn(async function election() {
   resetTimeout.call(this)
 })
 
-const onCheck = fn(async function onCheck() {
-  // only coordinator checks if all nodes are up.
-  if (this.coordinator === this && this.state === RaftState.LEADER) {
-    for (const node of this.network) {
-      const { status, response } = await node.call(appendEntry)
-      if (status === 'timeout') {
-        continue
-      }
-      if (response === false) {
-        await election.call(this)
-        return
-      }
-    }
-  }
-})
+// const onCheck = fn(async function onCheck() {
+//   // only coordinator checks if all nodes are up.
+//   if (this.coordinator === this && this.state === RaftState.LEADER) {
+//     for (const node of this.network) {
+//       const { status, response } = await node.call(appendEntry)
+//       if (status === 'timeout') {
+//         continue
+//       }
+//       if (response === false) {
+//         await election.call(this)
+//         return
+//       }
+//     }
+//   }
+// })
 
 // a generic timeout event
 const onTimeout = fn(async function onTimeout() {
@@ -159,6 +162,6 @@ const onStart = fn(async function onStart() {
 // algorithm end
 
 export const raft: Algorithm = {
-  rpcs: [],
+  rpcs: [requestVote, appendEntry],
   events: { onStart },
 }
