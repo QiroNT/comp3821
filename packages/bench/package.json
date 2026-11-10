@@ -1,0 +1,11 @@
+{
+  "name": "@leader-eval/bench",
+  "type": "module",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {},
+  "dependencies": {
+    "@stdlib/stats-base-dists-normal-quantile": "catalog:",
+    "random": "catalog:"
+  }
+}

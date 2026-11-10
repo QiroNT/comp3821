@@ -1,5 +1,5 @@
-import type { Algorithm } from 'framework'
-import { fn, rpc } from 'framework'
+import type { Algorithm } from '@leader-eval/framework'
+import { fn, rpc } from '@leader-eval/framework'
 
 /* eslint prefer-arrow-callback: "off", ts/no-use-before-define: "off" */
 // algorithm start

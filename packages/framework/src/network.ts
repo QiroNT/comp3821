@@ -1,4 +1,4 @@
-export type LatencyGenerator = (a: NetworkNode, b: NetworkNode) => number
+export type LatencyGenerator = (from: NetworkNode, to: NetworkNode) => number
 
 export interface NetworkNeighbor {
   node: NetworkNode

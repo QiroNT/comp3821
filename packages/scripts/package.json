@@ -1,5 +1,5 @@
 {
-  "name": "scripts",
+  "name": "@leader-eval/scripts",
   "type": "module",
   "private": true,
   "scripts": {

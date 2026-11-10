@@ -12,7 +12,7 @@ const PERCENTILES = [
   'p_99',
 ]
 
-const assets = resolve(dirname(fileURLToPath(import.meta.url)), '../../../../assets')
+const assets = resolve(dirname(fileURLToPath(import.meta.url)), '../../../../assets/cloudping')
 
 await mkdir(assets, { recursive: true })
 
@@ -31,6 +31,6 @@ await Promise.all(PERCENTILES.map(async (percentile) => {
   // check that the endpoint isn't lying
   JSON.parse(body)
 
-  const file = resolve(assets, `cloudping-1M-${percentile}.json`)
+  const file = resolve(assets, `1M-${percentile}.json`)
   await writeFile(file, body)
 }))

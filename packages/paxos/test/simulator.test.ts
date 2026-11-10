@@ -1,4 +1,4 @@
-import { Network, Simulator } from 'framework'
+import { Network, Simulator } from '@leader-eval/framework'
 import { expect, it } from 'vitest'
 import { paxos } from '../src'
 

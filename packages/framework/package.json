@@ -1,10 +1,9 @@
 {
-  "name": "framework",
+  "name": "@leader-eval/framework",
+  "type": "module",
   "private": true,
   "main": "src/index.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "scripts": {},
   "dependencies": {
     "random": "catalog:"
   }
