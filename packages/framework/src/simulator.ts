@@ -156,7 +156,9 @@ export class Simulator {
         await f.call(node)
       }
       catch (error) {
-        note(error instanceof AbortError ? 'aborted' : 'errored')
+        note(error instanceof AbortError
+          ? 'aborted'
+          : 'errored')
         this.noteError(id, error)
       }
     })
@@ -243,7 +245,9 @@ export class Simulator {
         note(res.status)
       })
       .catch((error) => {
-        note(error instanceof AbortError ? 'aborted' : 'errored')
+        note(error instanceof AbortError
+          ? 'aborted'
+          : 'errored')
         this.noteError(from.id, error)
       })
 

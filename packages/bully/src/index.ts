@@ -174,6 +174,12 @@ const onStart = fn(async function onStart() {
 // algorithm end
 
 export const bully: Algorithm = {
-  rpcs: [areYouNormal, areYouThere, halt, newCoordinator, ready],
+  rpcs: [
+    areYouNormal,
+    areYouThere,
+    halt,
+    newCoordinator,
+    ready,
+  ],
   events: { onStart },
 }
