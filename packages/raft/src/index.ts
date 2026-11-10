@@ -82,6 +82,7 @@ const appendEntry = rpc<boolean>()(async function appendEntry({ sender, reply },
 })
 
 const election = fn(async function election() {
+  this.clearTimeout()
   this.term += 1
 
   // vote for self
@@ -106,7 +107,7 @@ const election = fn(async function election() {
     this.assertLeader(this)
   }
   else {
-    // remain a candidate
+    // remain as a candidate
     this.state = RaftState.CANDIDATE
   }
   // no matter the result, a timeout starts
@@ -131,8 +132,6 @@ const election = fn(async function election() {
 
 // a generic timeout event
 const onTimeout = fn(async function onTimeout() {
-  resetTimeout.call(this)
-
   if (this.state === RaftState.FOLLOWER) {
     this.state = RaftState.CANDIDATE
     election.call(this)
@@ -146,6 +145,7 @@ const onTimeout = fn(async function onTimeout() {
       await node.call(appendEntry, this.term)
     }
   }
+  resetTimeout.call(this)
 })
 
 // When the system starts, or when the node recovers
