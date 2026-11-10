@@ -155,7 +155,7 @@ const onStart = fn(async function onStart() {
   this.state = RaftState.FOLLOWER
   this.term = 0
   // the node will now wait to timeout.
-  resetTimeout.call(this, this.random.int(10, 35))
+  resetTimeout.call(this)
 })
 
 // algorithm end
