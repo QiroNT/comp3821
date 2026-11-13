@@ -1,6 +1,7 @@
 import type { Algorithm, NodeRef, NodeThis, RpcResponse } from './algorithm'
 import type { Network } from './network'
 import type { MaybePromise } from './util'
+import { Random } from 'random'
 
 interface Scheduled {
   time: number
@@ -20,6 +21,7 @@ interface SimulatorConfig {
     replyTimeout: number
   }
   maxSteps: number
+  seed?: number | string
 }
 
 export class Simulator {
@@ -81,6 +83,8 @@ export class Simulator {
         if (handle !== undefined)
           this.timers.get(id)?.delete(handle)
       },
+
+      random: new Random(`${this.config.seed}/${id}`),
 
       callAll: (nodes, rpc, ...args) =>
         Promise.all(nodes.map(target => target.call(rpc, ...args))),
@@ -152,7 +156,9 @@ export class Simulator {
         await f.call(node)
       }
       catch (error) {
-        note(error instanceof AbortError ? 'aborted' : 'errored')
+        note(error instanceof AbortError
+          ? 'aborted'
+          : 'errored')
         this.noteError(id, error)
       }
     })
@@ -164,22 +170,35 @@ export class Simulator {
     return {
       id: other.id,
       call: (rpc, ...args) => {
-        const label = rpc.name || 'rpc'
-        // eslint-disable-next-line no-async-promise-executor
-        return this.send(self, other, label, sender => new Promise(async (resolve) => {
-          const reply = (response: any) =>
-            this.send(other, self, `${label} reply`, (sender, target) => {
-              resolve({ target: sender, status: 'ok', response })
-              return { target, status: 'ok', response: undefined }
-            })
+        const name = rpc.name || 'rpc'
+        const strArgs = args.map(a => JSON.stringify(a)).join(', ')
+        const label = `${name}(${strArgs})`
 
-          try {
-            await rpc.call(other, { sender, reply }, ...args)
-          }
-          catch (error) {
-            this.noteError(other.id, error)
-          }
-        }))
+        return this.send(
+          self,
+          other,
+          label,
+          // eslint-disable-next-line no-async-promise-executor
+          sender => new Promise(async (resolve) => {
+            const reply = (response: any) =>
+              this.send(
+                other,
+                self,
+                `${name} reply(${JSON.stringify(response)})`,
+                (sender, target) => {
+                  resolve({ target: sender, status: 'ok', response })
+                  return { target, status: 'ok', response: undefined }
+                },
+              )
+
+            try {
+              await rpc.call(other, { sender, reply }, ...args)
+            }
+            catch (error) {
+              this.noteError(other.id, error)
+            }
+          }),
+        )
       },
     }
   }
@@ -226,7 +245,9 @@ export class Simulator {
         note(res.status)
       })
       .catch((error) => {
-        note(error instanceof AbortError ? 'aborted' : 'errored')
+        note(error instanceof AbortError
+          ? 'aborted'
+          : 'errored')
         this.noteError(from.id, error)
       })
 

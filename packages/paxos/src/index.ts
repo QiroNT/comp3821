@@ -1,6 +1,6 @@
 /* eslint-disable no-empty-pattern */
-import type { Algorithm } from 'framework'
-import { fn, rpc } from 'framework'
+import type { Algorithm } from '@leader-eval/framework'
+import { fn, rpc } from '@leader-eval/framework'
 
 let globalProposalNumber = 0
 

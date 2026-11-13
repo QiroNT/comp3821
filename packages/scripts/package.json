@@ -1,0 +1,11 @@
+{
+  "name": "@leader-eval/scripts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "cloudping": "tsx src/bin/cloudping.ts"
+  },
+  "dependencies": {
+    "tsx": "catalog:"
+  }
+}
