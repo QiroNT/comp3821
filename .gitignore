@@ -154,3 +154,13 @@ vite.config.ts.timestamp-*
 *.pdf
 
 **/.DS_Store
+
+# Latex
+*.aux
+*.bbl
+*.nav
+*.out
+*.snm
+*.synctex.gz
+*.synctex.gz(busy)
+*.toc
