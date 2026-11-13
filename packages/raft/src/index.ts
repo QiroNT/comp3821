@@ -90,16 +90,18 @@ const election = fn(async function election() {
   this.voted = true
 
   // request votes from every node
+  let network_size = this.network.length
   for (const node of this.network) {
     const { status, response } = await node.call(requestVote, this.term)
     if (status === 'timeout') {
-      // TODO: Should we assume that there is now one less voter?
+      // Assume one less voter
+      network_size -= 1
     }
     this.votes += response ? 1 : 0
   }
 
   // become leader if win
-  if (this.votes > this.network.length / 2) {
+  if (this.votes > network_size / 2) {
     this.state = RaftState.LEADER
     // send initial heartbeat messages
     this.callAll(this.network, appendEntry, this.term)
