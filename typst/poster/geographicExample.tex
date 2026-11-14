@@ -1,0 +1,49 @@
+\begin{tikzpicture}[scale=2]
+\tikzstyle{vertex}=[circle,inner sep=0mm,minimum size=3ex]
+\def\n{5}
+\def\regionOneSize{3}
+\def\regionTwoStart{4}
+\def\radius{2.5cm}
+%draw k-complete graph
+\foreach \i in {1,...,\n} {
+    \def\vertexcolour{unsw@green}
+    \ifnum \i > \regionOneSize
+    \def\vertexcolour{unsw@red}
+    \fi
+    \pgfmathsetmacro{\angle}{90 - (\i - 1) * (360 / \n)}
+    \node[vertex, fill=\vertexcolour] (v\i) at (\angle:\radius) {};
+}
+
+% Draw edges between region 1   
+\foreach \i in {1,...,\regionOneSize} {
+    \foreach \j in {\i,...,\regionOneSize} {
+        \def\edgecolour{unsw@blue}
+        \ifnum\i < \j
+            \draw[line width=5pt,color=\edgecolour] (v\i) -- (v\j);
+            \draw (v\i) -- (v\j) node[midway, above, sloped, font=\scriptsize] {50ms};
+        \fi
+    }
+}
+
+%Draw edges between region 2
+\foreach \i in {\regionTwoStart,...,\n} {
+    \foreach \j in {\i,...,\n} {
+        \def\edgecolour{unsw@blue}
+        \ifnum\i < \j
+            \draw[line width=5pt,color=\edgecolour] (v\i) -- (v\j);
+            \draw (v\i) -- (v\j) node[midway, above, sloped, font=\scriptsize] {50ms};
+        \fi
+    }
+}
+
+%Draw heavier edges between regions.
+\foreach \i in {1,...,\regionOneSize} {
+    \foreach \j in {\regionTwoStart,...,\n} {
+        \def\edgecolour{unsw@orange}
+        \ifnum\i < \j
+            \draw[line width=5pt,color=\edgecolour] (v\i) -- (v\j);
+            \draw (v\i) -- (v\j) node[midway, above, sloped, font=\scriptsize] {300ms};
+        \fi
+    }
+}
+\end{tikzpicture}

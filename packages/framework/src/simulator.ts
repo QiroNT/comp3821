@@ -333,7 +333,7 @@ export class Simulator<NodeMetaT> {
 
     this.at(at, async () => {
       // we still run the content even when it's aborted, just not returning it
-      const r = Promise.resolve(f(settled))
+      const r = Promise.try(f, settled)
       r.catch((error) => {
         this.noteError(id, error)
       })
