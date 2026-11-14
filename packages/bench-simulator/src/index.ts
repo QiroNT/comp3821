@@ -19,16 +19,23 @@ export async function simulateCloudping(algorithm: Algorithm, regions: RegionNam
     algorithm,
     network,
     params: {
-      replyTimeout: 5_000,
+      replyTimeout: 2_000,
       checkInterval: 10_000,
       checkTimeout: 30_000,
     },
-    maxSteps: 10 * regions.length ** 2,
+    maxSteps: 10 * regions.length ** 3,
+    seed: Math.random(),
+  })
+
+  let msgCount = 0
+  simulator.hooks.hook('rpc:call', () => {
+    msgCount++
   })
 
   await simulator.run()
 
   return {
     time: simulator.getTime(),
+    msgCount,
   }
 }

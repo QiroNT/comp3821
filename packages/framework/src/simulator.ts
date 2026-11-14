@@ -1,5 +1,5 @@
 import type { Hookable, HookKeys, InferCallback } from 'hookable'
-import type { Algorithm, NodeRef, NodeThis, RpcResponse } from './algorithm'
+import type { Algorithm, NodeRef, NodeThis, Rpc, RpcResponse } from './algorithm'
 import type { Network, NetworkNode } from './network'
 import type { MaybePromise } from './util'
 import { createHooks } from 'hookable'
@@ -38,8 +38,10 @@ export interface SimulatorHookContext<NodeMetaT> {
 }
 
 export interface SimulatorHooks<NodeMetaT> {
-  'leader:assert': (ctx: SimulatorHookContext<NodeMetaT>, id: number, leader?: number) => MaybePromise<void>
-  'leader:consent': (ctx: SimulatorHookContext<NodeMetaT>, leader: number) => MaybePromise<void>
+  'rpc:call': (ctx: SimulatorHookContext<NodeMetaT>, f: Rpc<any[], any>, caller: NetworkNode<NodeMetaT>, callee: NetworkNode<NodeMetaT>) => MaybePromise<void>
+  'rpc:reply': (ctx: SimulatorHookContext<NodeMetaT>, f: Rpc<any[], any>, caller: NetworkNode<NodeMetaT>, callee: NetworkNode<NodeMetaT>) => MaybePromise<void>
+  'leader:assert': (ctx: SimulatorHookContext<NodeMetaT>, node: NetworkNode<NodeMetaT>, leader?: NetworkNode<NodeMetaT>) => MaybePromise<void>
+  'leader:consent': (ctx: SimulatorHookContext<NodeMetaT>, leader: NetworkNode<NodeMetaT>) => MaybePromise<void>
 }
 
 export class Simulator<NodeMetaT> {
@@ -146,14 +148,18 @@ export class Simulator<NodeMetaT> {
       this.leaders.delete(id)
     }
     this.logs.push(`[${this.timestamp()}] ${id} assertLeader(${leader?.id})`)
-    this.callHook('leader:assert', id, leader?.id)
+    this.callHook(
+      'leader:assert',
+      this.nodes[id].netNode,
+      leader ? this.nodes[leader.id].netNode : undefined,
+    )
 
     // stop once every node agrees on the same leader
     const agreed = this.leaders.get(0)
     if (agreed !== undefined && this.nodes.every(node => this.leaders.get(node.id) === agreed)) {
       this.finished = true
       this.logs.push(`[${this.timestamp()}] leader settled: ${agreed}`)
-      this.callHook('leader:consent', agreed)
+      this.callHook('leader:consent', this.nodes[agreed].netNode)
     }
   }
 
@@ -217,8 +223,12 @@ export class Simulator<NodeMetaT> {
           label,
           // eslint-disable-next-line no-async-promise-executor
           senderRef => new Promise(async (resolve) => {
-            const reply = (response: any) =>
-              this.send(
+            this.callHook('rpc:call', rpc, self.netNode, other.netNode)
+
+            const reply = (response: any) => {
+              this.callHook('rpc:reply', rpc, self.netNode, other.netNode)
+
+              return this.send(
                 other,
                 self,
                 `${name} reply(${JSON.stringify(response)})`,
@@ -227,6 +237,7 @@ export class Simulator<NodeMetaT> {
                   return { target: targetRef, status: 'ok', response: undefined }
                 },
               )
+            }
 
             try {
               await rpc.call(other.self, { sender: senderRef, reply }, ...args)
@@ -451,6 +462,6 @@ export class Simulator<NodeMetaT> {
 
   private flush() {
     // flush the microtask queue
-    return new Promise(resolve => setTimeout(resolve, 0))
+    return new Promise(resolve => setImmediate(resolve))
   }
 }
