@@ -1,28 +1,37 @@
-export type LatencyGenerator = (from: NetworkNode, to: NetworkNode) => number
+export type LatencyGenerator<NodeMetaT> = (
+  from: NetworkNode<NodeMetaT>,
+  to: NetworkNode<NodeMetaT>,
+) => number
 
-export interface NetworkNeighbor {
-  node: NetworkNode
-  latency: LatencyGenerator
+export interface NetworkNeighbor<NodeMetaT> {
+  node: NetworkNode<NodeMetaT>
+  latency: LatencyGenerator<NodeMetaT>
 }
 
-export interface NetworkNode {
-  neighbors: Set<NetworkNeighbor>
+export interface NetworkNode<NodeMetaT> {
+  meta: NodeMetaT
+  neighbors: Set<NetworkNeighbor<NodeMetaT>>
 }
 
-export class Network {
-  public nodes: NetworkNode[] = []
+export class Network<NodeMetaT> {
+  public nodes: NetworkNode<NodeMetaT>[] = []
   constructor() { }
 
-  addNode(): NetworkNode {
+  addNode(meta: NodeMetaT): NetworkNode<NodeMetaT> {
     const node = {
+      meta,
       neighbors: new Set(),
-    } satisfies NetworkNode
+    } satisfies NetworkNode<NodeMetaT>
 
     this.nodes.push(node)
     return node
   }
 
-  connectNodes(a: NetworkNode, b: NetworkNode, latency: LatencyGenerator) {
+  connectNodes(
+    a: NetworkNode<NodeMetaT>,
+    b: NetworkNode<NodeMetaT>,
+    latency: LatencyGenerator<NodeMetaT>,
+  ) {
     a.neighbors.add({
       node: b,
       latency,
@@ -33,7 +42,7 @@ export class Network {
     })
   }
 
-  fullyConnect(latency: LatencyGenerator) {
+  fullyConnect(latency: LatencyGenerator<NodeMetaT>) {
     for (let i = 0; i < this.nodes.length; i++) {
       for (let j = i + 1; j < this.nodes.length; j++) {
         this.connectNodes(this.nodes[i], this.nodes[j], latency)
@@ -41,7 +50,7 @@ export class Network {
     }
   }
 
-  connectRing(latency: LatencyGenerator) {
+  connectRing(latency: LatencyGenerator<NodeMetaT>) {
     for (let i = 0; i < this.nodes.length; i++) {
       const next = (i + 1) % this.nodes.length
       this.connectNodes(this.nodes[i], this.nodes[next], latency)

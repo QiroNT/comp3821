@@ -121,7 +121,7 @@ const onStart = fn(async function onStart() {
   this.acceptor = new Acceptor()
   this.learner = new Listener()
   // the node will now wait to timeout.
-  this.setTimeout(onTimeout, this.params.checkTimeout)
+  this.setTimeout(onTimeout, 0)
 })
 
 export const paxos: Algorithm = {

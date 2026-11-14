@@ -1,6 +1,8 @@
+import type { Hookable, HookKeys, InferCallback } from 'hookable'
 import type { Algorithm, NodeRef, NodeThis, RpcResponse } from './algorithm'
-import type { Network } from './network'
+import type { Network, NetworkNode } from './network'
 import type { MaybePromise } from './util'
+import { createHooks } from 'hookable'
 import { Random } from 'random'
 
 interface Scheduled {
@@ -14,9 +16,15 @@ interface Abortable {
 
 class AbortError extends Error { }
 
-interface SimulatorConfig {
+interface SimulatorNode<NodeMetaT> {
+  id: number
+  self: NodeThis
+  netNode: NetworkNode<NodeMetaT>
+}
+
+export interface SimulatorConfig<NodeMetaT> {
   algorithm: Algorithm
-  network: Network
+  network: Network<NodeMetaT>
   params: Record<string, any> & {
     replyTimeout: number
   }
@@ -24,8 +32,20 @@ interface SimulatorConfig {
   seed?: number | string
 }
 
-export class Simulator {
-  private nodes: NodeThis[] = []
+export interface SimulatorHookContext<NodeMetaT> {
+  simulator: Simulator<NodeMetaT>
+  finish: () => void
+}
+
+export interface SimulatorHooks<NodeMetaT> {
+  'leader:assert': (ctx: SimulatorHookContext<NodeMetaT>, id: number, leader?: number) => MaybePromise<void>
+  'leader:consent': (ctx: SimulatorHookContext<NodeMetaT>, leader: number) => MaybePromise<void>
+}
+
+export class Simulator<NodeMetaT> {
+  public hooks: Hookable<SimulatorHooks<NodeMetaT>> = createHooks()
+
+  private nodes: SimulatorNode<NodeMetaT>[] = []
 
   private time = 0
   private logs: string[] = []
@@ -40,18 +60,18 @@ export class Simulator {
   private failure?: unknown
 
   constructor(
-    private config: SimulatorConfig,
+    private config: SimulatorConfig<NodeMetaT>,
   ) { }
 
   reset() {
     const { nodes } = this.config.network
-    this.nodes = nodes.map((_, id) => this.createNode(id))
+    this.nodes = nodes.map((node, id) => this.createNode(id, node))
 
     for (const node of this.nodes) {
       const neighbors = new Set([...nodes[node.id].neighbors]
         .map(n => nodes.indexOf(n.node)))
 
-      node.network = [...neighbors]
+      node.self.network = [...neighbors]
         .sort((a, b) => a - b)
         .map(id => this.createRef(node, this.nodes[id]))
     }
@@ -68,15 +88,16 @@ export class Simulator {
     this.failure = undefined
   }
 
-  private createNode(id: number): NodeThis {
-    return {
+  private createNode(
+    id: number,
+    netNode: NetworkNode<NodeMetaT>,
+  ): SimulatorNode<NodeMetaT> {
+    const self = {
       id,
       network: [],
       params: this.config.params,
       abortOutstanding: () => this.abortOutstanding(id),
-      assertLeader: (leader) => {
-        this.recordLeader(id, leader)
-      },
+      assertLeader: leader => this.assertLeader(id, leader),
 
       setTimeout: (f, delay) => this.setTimeout(id, f, delay),
       clearTimeout: (handle) => {
@@ -86,8 +107,19 @@ export class Simulator {
 
       random: new Random(`${this.config.seed}/${id}`),
 
-      callAll: (nodes, rpc, ...args) =>
-        Promise.all(nodes.map(target => target.call(rpc, ...args))),
+      callAll: (nodes, rpc, ...args) => {
+        const all = Promise.all(nodes.map(target => target.call(rpc, ...args)))
+        all.catch((error) => {
+          this.noteError(id, error)
+        })
+        return all
+      },
+    } satisfies NodeThis
+
+    return {
+      id: self.id,
+      self,
+      netNode,
     }
   }
 
@@ -106,7 +138,7 @@ export class Simulator {
     return aborted
   }
 
-  private recordLeader(id: number, leader?: NodeRef | NodeThis) {
+  private assertLeader(id: number, leader?: NodeRef | NodeThis) {
     if (leader) {
       this.leaders.set(id, leader.id)
     }
@@ -114,12 +146,14 @@ export class Simulator {
       this.leaders.delete(id)
     }
     this.logs.push(`[${this.timestamp()}] ${id} assertLeader(${leader?.id})`)
+    this.callHook('leader:assert', id, leader?.id)
 
     // stop once every node agrees on the same leader
     const agreed = this.leaders.get(0)
     if (agreed !== undefined && this.nodes.every(node => this.leaders.get(node.id) === agreed)) {
       this.finished = true
       this.logs.push(`[${this.timestamp()}] leader settled: ${agreed}`)
+      this.callHook('leader:consent', agreed)
     }
   }
 
@@ -153,7 +187,7 @@ export class Simulator {
       }
 
       try {
-        await f.call(node)
+        await f.call(node.self)
       }
       catch (error) {
         note(error instanceof AbortError
@@ -166,7 +200,10 @@ export class Simulator {
     return handle
   }
 
-  private createRef(self: NodeThis, other: NodeThis): NodeRef {
+  private createRef(
+    self: SimulatorNode<NodeMetaT>,
+    other: SimulatorNode<NodeMetaT>,
+  ): NodeRef {
     return {
       id: other.id,
       call: (rpc, ...args) => {
@@ -179,20 +216,20 @@ export class Simulator {
           other,
           label,
           // eslint-disable-next-line no-async-promise-executor
-          sender => new Promise(async (resolve) => {
+          senderRef => new Promise(async (resolve) => {
             const reply = (response: any) =>
               this.send(
                 other,
                 self,
                 `${name} reply(${JSON.stringify(response)})`,
-                (sender, target) => {
-                  resolve({ target: sender, status: 'ok', response })
-                  return { target, status: 'ok', response: undefined }
+                (senderRef, targetRef) => {
+                  resolve({ target: senderRef, status: 'ok', response })
+                  return { target: targetRef, status: 'ok', response: undefined }
                 },
               )
 
             try {
-              await rpc.call(other, { sender, reply }, ...args)
+              await rpc.call(other.self, { sender: senderRef, reply }, ...args)
             }
             catch (error) {
               this.noteError(other.id, error)
@@ -204,10 +241,10 @@ export class Simulator {
   }
 
   private send<T>(
-    from: NodeThis,
-    to: NodeThis,
+    from: SimulatorNode<NodeMetaT>,
+    to: SimulatorNode<NodeMetaT>,
     label: string,
-    f: (sender: NodeRef, target: NodeRef) => MaybePromise<RpcResponse<T>>,
+    f: (senderRef: NodeRef, targetRef: NodeRef) => MaybePromise<RpcResponse<T>>,
   ): Promise<RpcResponse<T>> {
     const latency = this.latency(from, to)
 
@@ -217,26 +254,26 @@ export class Simulator {
       this.logs[logLine] += ` ${text}`
     }
 
-    const sender = to.network.find(ref => ref.id === from.id)!
-    const target = from.network.find(ref => ref.id === to.id)!
+    const senderRef = to.self.network.find(ref => ref.id === from.id)!
+    const targetRef = from.self.network.find(ref => ref.id === to.id)!
 
     // we treat invalid latencies as disconnected
     if (!Number.isFinite(latency)) {
       note('timeout')
-      return Promise.resolve({ target, status: 'timeout' })
+      return Promise.resolve({ target: targetRef, status: 'timeout' })
     }
 
     // schedule a timeout response
     const timeout = this.schedule(
       this.time + this.config.params.replyTimeout,
-      () => ({ target, status: 'timeout' } satisfies RpcResponse<T>),
+      () => ({ target: targetRef, status: 'timeout' } satisfies RpcResponse<T>),
     )
 
     // schedule the actual response
     const response = this.scheduleAbortable(
       from.id,
       this.time + Math.max(0, latency),
-      () => f(sender, target),
+      () => f(senderRef, targetRef),
     )
 
     const ret = Promise.race([timeout, response])
@@ -254,15 +291,16 @@ export class Simulator {
     return ret
   }
 
-  private latency(from: NodeThis, to: NodeThis): number {
-    const a = this.config.network.nodes[from.id]
-    const b = this.config.network.nodes[to.id]
-
-    const link = [...a.neighbors].find(neighbor => neighbor.node === b)
+  private latency(
+    from: SimulatorNode<NodeMetaT>,
+    to: SimulatorNode<NodeMetaT>,
+  ): number {
+    const link = Array.from(from.netNode.neighbors)
+      .find(neighbor => neighbor.node === to.netNode)
     if (!link)
       throw new Error(`node ${from.id} tried to call non-neighboring node ${to.id}`)
 
-    return link.latency(a, b)
+    return link.latency(from.netNode, to.netNode)
   }
 
   private scheduleAbortable<T>(
@@ -337,12 +375,7 @@ export class Simulator {
   async run() {
     this.reset()
 
-    const { onStart } = this.config.algorithm.events ?? {}
-    if (onStart) {
-      for (const node of this.nodes)
-        this.startNode(node, onStart)
-    }
-
+    this.startNodes()
     await this.flush()
 
     let steps = 0
@@ -364,15 +397,18 @@ export class Simulator {
       throw this.failure
   }
 
-  private async startNode(
-    node: NodeThis,
-    f: (this: NodeThis, config: Record<string, any>) => MaybePromise<void>,
-  ) {
-    try {
-      await f.call(node, this.config.params)
-    }
-    catch (error) {
-      this.noteError(node.id, error)
+  private async startNodes() {
+    const { onStart } = this.config.algorithm.events ?? {}
+    if (!onStart)
+      return
+
+    for (const node of this.nodes) {
+      try {
+        await onStart.call(node.self, this.config.params)
+      }
+      catch (error) {
+        this.noteError(node.id, error)
+      }
     }
   }
 
@@ -385,8 +421,28 @@ export class Simulator {
     this.finished = true
   }
 
-  log(): string[] {
+  private callHook<NameT extends HookKeys<SimulatorHooks<NodeMetaT>>>(
+    name: NameT,
+    ...args: Parameters<InferCallback<SimulatorHooks<NodeMetaT>, NameT>> extends [SimulatorHookContext<NodeMetaT>, ...infer ArgsT] ? ArgsT : never
+  ) {
+    return this.hooks.callHook(name, this.hookContext(), ...args as never)
+  }
+
+  private hookContext(): SimulatorHookContext<NodeMetaT> {
+    return {
+      simulator: this,
+      finish: () => {
+        this.finished = true
+      },
+    }
+  }
+
+  getLogs(): string[] {
     return this.logs
+  }
+
+  getTime(): number {
+    return this.time
   }
 
   private timestamp() {

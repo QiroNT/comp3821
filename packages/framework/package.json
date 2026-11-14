@@ -5,6 +5,7 @@
   "main": "src/index.ts",
   "scripts": {},
   "dependencies": {
+    "hookable": "catalog:",
     "random": "catalog:"
   }
 }

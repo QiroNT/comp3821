@@ -1,6 +1,6 @@
 import type { Random } from 'random'
 import assert from 'node:assert/strict'
-import quantile from '@stdlib/stats-base-dists-normal-quantile'
+import quantile from '@stdlib/stats/base/dists/normal/quantile'
 import p_10 from '../../../assets/cloudping/1M-p_10.json'
 import p_25 from '../../../assets/cloudping/1M-p_25.json'
 import p_50 from '../../../assets/cloudping/1M-p_50.json'
@@ -9,8 +9,27 @@ import p_90 from '../../../assets/cloudping/1M-p_90.json'
 import p_98 from '../../../assets/cloudping/1M-p_98.json'
 import p_99 from '../../../assets/cloudping/1M-p_99.json'
 
-type RegionName = keyof typeof p_10['data']
-const regions = Object.keys(p_10.data) as RegionName[]
+export type RegionName = keyof typeof p_10['data']
+export const regionsAll = Object.keys(p_10.data) as RegionName[]
+export const regionsDefault = [ // probably what most ppl uses
+  'ap-northeast-1',
+  'ap-northeast-2',
+  'ap-northeast-3',
+  'ap-south-1',
+  'ap-southeast-1',
+  'ap-southeast-2',
+  'ca-central-1',
+  'eu-central-1',
+  'eu-north-1',
+  'eu-west-1',
+  'eu-west-2',
+  'eu-west-3',
+  'sa-east-1',
+  'us-east-1',
+  'us-east-2',
+  'us-west-1',
+  'us-west-2',
+] as const satisfies RegionName[]
 
 const percentiles = [
   p_10,
@@ -39,8 +58,8 @@ const scores = percentiles.map((p) => {
 
 // log latency at each percentile
 const knots = new Map<string, number[]>()
-for (const from of regions) {
-  for (const to of regions) {
+for (const from of regionsAll) {
+  for (const to of regionsAll) {
     const latencies = percentiles.map(p => p.data[from][to])
 
     assert(

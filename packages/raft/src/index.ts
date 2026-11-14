@@ -27,13 +27,9 @@ enum RaftState {
 
 // reset timeout
 const resetTimeout = fn(function resetTimeout(delay?: number) {
+  const d = delay || this.params.checkTimeout
   this.clearTimeout(this.timer)
-  if (delay) {
-    this.timer = this.setTimeout(onTimeout, delay)
-  }
-  else {
-    this.timer = this.setTimeout(onTimeout, this.params.checkTimeout + this.random.int(10, 35))
-  }
+  this.timer = this.setTimeout(onTimeout, d)
 })
 
 // A candidate calls this to request a vote
@@ -85,8 +81,9 @@ const election = fn(async function election() {
   this.clearTimeout()
   this.term += 1
 
+  let votes = 1
+
   // vote for self
-  this.votes = 1
   this.voted = true
 
   // request votes from every node
@@ -97,11 +94,11 @@ const election = fn(async function election() {
       // Assume one less voter
       network_size -= 1
     }
-    this.votes += response ? 1 : 0
+    votes += response ? 1 : 0
   }
 
   // become leader if win
-  if (this.votes > network_size / 2) {
+  if (votes > network_size / 2) {
     this.state = RaftState.LEADER
     // send initial heartbeat messages
     this.callAll(this.network, appendEntry, this.term)
@@ -157,7 +154,7 @@ const onStart = fn(async function onStart() {
   this.state = RaftState.FOLLOWER
   this.term = 0
   // the node will now wait to timeout.
-  resetTimeout.call(this)
+  resetTimeout.call(this, this.random.int(10, 35))
 })
 
 // algorithm end
