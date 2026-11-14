@@ -44,7 +44,7 @@ const requestVote = rpc<boolean>()(async function requestVotes({ reply }, currTe
   if (this.state === RaftState.LEADER) {
     // TODO: randomised backoff
     this.state = RaftState.FOLLOWER
-    resetTimeout.call(this, this.random.int(10, 35))
+    resetTimeout.call(this, this.random.float(100, 350))
   }
   if (this.state !== RaftState.FOLLOWER) {
     await reply(false)
@@ -113,14 +113,13 @@ const election = fn(async function election() {
     this.callAll(this.network, appendEntry, this.term)
     this.coordinator = this
     this.assertLeader(this)
+    resetTimeout.call(this)
   }
   else {
     // remain as a candidate
     this.state = RaftState.CANDIDATE
+    resetTimeout.call(this, this.random.float(100, 350))
   }
-
-  // no matter the result, a timeout starts
-  resetTimeout.call(this)
 })
 
 // const onCheck = fn(async function onCheck() {
@@ -141,18 +140,19 @@ const election = fn(async function election() {
 
 // a generic timeout event
 const onTimeout = fn(async function onTimeout() {
+  resetTimeout.call(this)
+
   if (this.state === RaftState.FOLLOWER) {
     this.state = RaftState.CANDIDATE
-    election.call(this)
+    await election.call(this)
   }
   else if (this.state === RaftState.CANDIDATE) {
-    election.call(this)
+    await election.call(this)
   }
   else if (this.state === RaftState.LEADER) {
     // send heartbeat pulses
     this.callAll(this.network, appendEntry, this.term)
   }
-  resetTimeout.call(this)
 })
 
 // When the system starts, or when the node recovers
@@ -162,7 +162,7 @@ const onStart = fn(async function onStart() {
   this.state = RaftState.FOLLOWER
   this.term = 0
   // the node will now wait to timeout.
-  resetTimeout.call(this, this.random.int(0, 25))
+  resetTimeout.call(this, this.random.float(0, 250))
 })
 
 // algorithm end

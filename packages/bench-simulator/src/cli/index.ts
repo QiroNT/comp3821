@@ -1,33 +1,50 @@
 import type { Algorithm } from '@leader-eval/framework'
-import { progress } from '@clack/prompts'
+import type { RegionName } from '../cloudping'
+import { log, progress } from '@clack/prompts'
 import { bully } from '@leader-eval/bully'
 import { paxos } from '@leader-eval/paxos'
 import { raft } from '@leader-eval/raft'
 import incrmeanstdev from '@stdlib/stats/incr/meanstdev'
 import { simulateCloudping } from '..'
-import { regionsDefault } from '../cloudping'
+import { regionsAll, regionsDefault } from '../cloudping'
 
-const regions = regionsDefault
-const loops = 10
+const loops = 200
 
-async function iter(name: string, algo: Algorithm) {
+async function each(name: string, algo: Algorithm, regions: RegionName[]) {
   const p = progress({ max: loops })
   p.start(`Measuring ${name}`)
 
-  const sample = incrmeanstdev()
+  const sampleTime = incrmeanstdev()
+  const sampleMsg = incrmeanstdev()
 
   for (let i = 0; i < loops; i++) {
     const r = await simulateCloudping(algo, regions)
-    sample(r.time)
+    sampleTime(r.time)
+    sampleMsg(r.msgCount)
 
     p.advance(1, `Measuring ${name} (${i + 1}/${loops})`)
   }
 
-  const [mean, stdev] = Array.from(sample()!)
+  p.clear()
 
-  p.stop(`${name}: ${mean.toFixed(2)}ms +/- ${stdev.toFixed(2)}`)
+  const [meanT, stdevT] = Array.from(sampleTime()!)
+  const [meanM, stdevM] = Array.from(sampleMsg()!)
+
+  log.info([
+    `${name}:`,
+    `time: ${meanT.toFixed(2)}ms, stddev ${stdevT.toFixed(2)}`,
+    `message: ${meanM.toFixed(2)}, stddev ${stdevM.toFixed(2)}`,
+  ].join('\n'))
 }
 
-await iter('bully', bully)
-await iter('paxos', paxos)
-await iter('raft', raft)
+async function iter(regions: RegionName[]) {
+  await each('bully', bully, regions)
+  await each('paxos', paxos, regions)
+  await each('raft', raft, regions)
+}
+
+log.info(`Testing default regions (${regionsDefault.length} nodes)`)
+await iter(regionsDefault)
+
+log.info(`Testing all regions (${regionsAll.length} nodes)`)
+await iter(regionsAll)
