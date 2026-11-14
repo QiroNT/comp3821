@@ -64,7 +64,9 @@
     \end{column}
     \begin{column}{.5\linewidth}
       \begin{mytealbox}{Testing framework}
-        
+        We implemented a testing framework so that our experiment could be indpendent of hardware.
+        It provides an API for separate implementations of our algorithms to work on exactly the same network configuration and same communication overhead.
+        This also allows us to construct specific network latency profiles and standardise running times to standard theoretical networks instead of CPU cycle speed.
       \end{mytealbox}
       \begin{myorangebox}{Variables}
         We tested the all combinations of the following:
