@@ -1,0 +1,19 @@
+{
+  "name": "@leader-eval/bench-simulator",
+  "type": "module",
+  "private": true,
+  "main": "src/cli/index.ts",
+  "scripts": {
+    "bench": "tsx src/cli/index.ts"
+  },
+  "dependencies": {
+    "@clack/prompts": "catalog:",
+    "@leader-eval/bully": "workspace:*",
+    "@leader-eval/framework": "workspace:*",
+    "@leader-eval/paxos": "workspace:*",
+    "@leader-eval/raft": "workspace:*",
+    "@stdlib/stats": "catalog:",
+    "random": "catalog:",
+    "tsx": "catalog:"
+  }
+}

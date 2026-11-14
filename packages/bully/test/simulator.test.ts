@@ -5,7 +5,7 @@ import { bully } from '../src'
 it('should complete in mesh', async () => {
   const network = new Network()
   for (let i = 0; i < 5; i++)
-    network.addNode()
+    network.addNode(undefined)
   network.fullyConnect(() => 1)
 
   const simulator = new Simulator({
@@ -21,7 +21,7 @@ it('should complete in mesh', async () => {
 
   await simulator.run()
 
-  expect(simulator.log()).toMatchInlineSnapshot(`
+  expect(simulator.getLogs()).toMatchInlineSnapshot(`
     [
       "[     0.0] 0 -> 1 areYouThere() ok",
       "[     0.0] 0 -> 2 areYouThere() ok",
@@ -76,14 +76,14 @@ it('should complete in mesh', async () => {
     ]
   `)
 
-  const settled = simulator.log().find(line => line.includes('leader settled'))
+  const settled = simulator.getLogs().find(line => line.includes('leader settled'))
   expect(settled).toMatch(/leader settled: \d+$/)
 })
 
 it('should not conclude if it forever timeouts', async () => {
   const network = new Network()
   for (let i = 0; i < 5; i++)
-    network.addNode()
+    network.addNode(undefined)
   network.fullyConnect(() => 100)
 
   const simulator = new Simulator({
@@ -101,7 +101,7 @@ it('should not conclude if it forever timeouts', async () => {
     .rejects
     .toThrow('simulation did not terminate')
 
-  expect(simulator.log()).toMatchInlineSnapshot(`
+  expect(simulator.getLogs()).toMatchInlineSnapshot(`
     [
       "[     0.0] 0 -> 1 areYouThere() timeout",
       "[     0.0] 0 -> 2 areYouThere() timeout",

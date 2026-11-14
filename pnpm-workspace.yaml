@@ -12,9 +12,11 @@ allowBuilds:
 
 catalog:
   '@antfu/eslint-config': ^10.0.0
-  '@stdlib/stats-base-dists-normal-quantile': ^0.3.1
+  '@clack/prompts': ^1.9.0
+  '@stdlib/stats': ^0.4.1
   '@types/node': ^26.6.6
   eslint: ^10.14.0
+  hookable: ^6.1.2
   random: ^5.5.1
   tsx: ^4.23.15
   typescript: ^6.0.3

@@ -5,7 +5,7 @@ import { raft } from '../src'
 it('should complete in mesh', async () => {
   const network = new Network()
   for (let i = 0; i < 5; i++)
-    network.addNode()
+    network.addNode(undefined)
   network.fullyConnect(() => 1)
 
   const simulator = new Simulator({
@@ -21,7 +21,7 @@ it('should complete in mesh', async () => {
 
   await simulator.run()
 
-  expect(simulator.log()).toMatchInlineSnapshot(`
+  expect(simulator.getLogs()).toMatchInlineSnapshot(`
     [
       "[    49.0] 1 onTimeout",
       "[    49.0] 1 -> 0 requestVotes(1) ok",
@@ -54,14 +54,14 @@ it('should complete in mesh', async () => {
     ]
   `)
 
-  const settled = simulator.log().find(line => line.includes('leader settled'))
+  const settled = simulator.getLogs().find(line => line.includes('leader settled'))
   expect(settled).toMatch(/leader settled: \d+$/)
 })
 
 it('should not conclude if it forever timeouts', async () => {
   const network = new Network()
   for (let i = 0; i < 5; i++)
-    network.addNode()
+    network.addNode(undefined)
   network.fullyConnect(() => 100)
 
   const simulator = new Simulator({
@@ -79,7 +79,7 @@ it('should not conclude if it forever timeouts', async () => {
     .rejects
     .toThrow('simulation did not terminate')
 
-  expect(simulator.log()).toMatchInlineSnapshot(`
+  expect(simulator.getLogs()).toMatchInlineSnapshot(`
     [
       "[    49.0] 1 onTimeout",
       "[    49.0] 1 -> 0 requestVotes(1) timeout",

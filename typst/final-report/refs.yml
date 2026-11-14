@@ -1,4 +1,3 @@
-# Real Sources
 roohitavaf-paxos:
   type: article
   title: The Paxos algorithm, when presented in plain English, is very simple
@@ -103,3 +102,11 @@ dls-partial-synchrony:
     title: Journal of the ACM
     volume: 35
     issue: 2
+
+adorjan-cloudping:
+  type: web
+  title: AWS Latency Monitoring
+  author: Adorjan, Matt
+  url:
+    value: https://www.cloudping.co/
+    date: 2026-11-10
