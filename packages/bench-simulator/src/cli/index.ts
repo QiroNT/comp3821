@@ -27,13 +27,13 @@ async function each(name: string, algo: Algorithm, regions: RegionName[]) {
 
   p.clear()
 
-  const [meanT, stdevT] = Array.from(sampleTime()!)
-  const [meanM, stdevM] = Array.from(sampleMsg()!)
+  const [meanT, stddevT] = Array.from(sampleTime()!)
+  const [meanM, stddevM] = Array.from(sampleMsg()!)
 
   log.info([
     `${name}:`,
-    `time: ${meanT.toFixed(2)}ms, stddev ${stdevT.toFixed(2)}`,
-    `message: ${meanM.toFixed(2)}, stddev ${stdevM.toFixed(2)}`,
+    `time: ${meanT.toFixed(2)}ms, stddev ${stddevT.toFixed(2)}`,
+    `message: ${meanM.toFixed(2)}, stddev ${stddevM.toFixed(2)}`,
   ].join('\n'))
 }
 
