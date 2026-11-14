@@ -5,6 +5,7 @@
   "main": "src/index.ts",
   "scripts": {},
   "dependencies": {
+    "fastpriorityqueue": "catalog:",
     "hookable": "catalog:",
     "random": "catalog:"
   }

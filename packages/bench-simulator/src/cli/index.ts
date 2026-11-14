@@ -1,31 +1,40 @@
-import type { Algorithm } from '@leader-eval/framework'
-import type { RegionName } from '../cloudping'
-import { log, progress } from '@clack/prompts'
-import { bully } from '@leader-eval/bully'
-import { paxos } from '@leader-eval/paxos'
-import { raft } from '@leader-eval/raft'
+import type { RegionName } from '../cloudping/latency'
+import { stdout } from 'node:process'
+import { isTTY, log, progress } from '@clack/prompts'
 import incrmeanstdev from '@stdlib/stats/incr/meanstdev'
-import { simulateCloudping } from '..'
-import { regionsAll, regionsDefault } from '../cloudping'
+import { Tinypool } from 'tinypool'
+import { algorithms } from '../algorithm'
+import { regionsAll, regionsDefault } from '../cloudping/latency'
 
 const loops = 200
 
-async function each(name: string, algo: Algorithm, regions: RegionName[]) {
-  const p = progress({ max: loops })
-  p.start(`Measuring ${name}`)
+const pool = new Tinypool({
+  filename: new URL('../cloudping/worker.ts', import.meta.url),
+})
+
+async function each(name: string, regions: RegionName[]) {
+  const p = isTTY(stdout)
+    ? progress({ max: loops })
+    : undefined
+  p?.start(`Measuring ${name}`)
 
   const sampleTime = incrmeanstdev()
   const sampleMsg = incrmeanstdev()
 
+  let count = 0
+  const promises = []
   for (let i = 0; i < loops; i++) {
-    const r = await simulateCloudping(algo, regions)
-    sampleTime(r.time)
-    sampleMsg(r.msgCount)
+    const promise = pool.run({ name, regions }).then((r) => {
+      sampleTime(r.time)
+      sampleMsg(r.msgCount)
 
-    p.advance(1, `Measuring ${name} (${i + 1}/${loops})`)
+      p?.advance(1, `Measuring ${name} (${++count}/${loops})`)
+    })
+    promises.push(promise)
   }
+  await Promise.all(promises)
 
-  p.clear()
+  p?.clear()
 
   const [meanT, stddevT] = Array.from(sampleTime()!)
   const [meanM, stddevM] = Array.from(sampleMsg()!)
@@ -38,9 +47,8 @@ async function each(name: string, algo: Algorithm, regions: RegionName[]) {
 }
 
 async function iter(regions: RegionName[]) {
-  await each('bully', bully, regions)
-  await each('paxos', paxos, regions)
-  await each('raft', raft, regions)
+  for (const name of Object.keys(algorithms))
+    await each(name, regions)
 }
 
 log.info(`Testing default regions (${regionsDefault.length} nodes)`)
@@ -56,6 +64,8 @@ const regionsSkewed = [
 log.info(`Testing 95%/5% regions (${regionsSkewed.length} nodes)`)
 await iter(regionsSkewed)
 
-const regionsSingle = Array.from<RegionName>({ length: 100 }).fill('us-east-1')
+const regionsSingle = Array.from<RegionName>({ length: 200 }).fill('us-east-1')
 log.info(`Testing single region (${regionsSingle.length} nodes)`)
 await iter(regionsSingle)
+
+await pool.destroy()

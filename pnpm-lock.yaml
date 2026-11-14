@@ -21,6 +21,9 @@ catalogs:
     eslint:
       specifier: ^10.14.0
       version: 10.14.0
+    fastpriorityqueue:
+      specifier: ^0.8.0
+      version: 0.8.0
     hookable:
       specifier: ^6.1.2
       version: 6.1.2
@@ -30,6 +33,9 @@ catalogs:
     random:
       specifier: ^5.5.1
       version: 5.5.1
+    tinypool:
+      specifier: ^2.2.0
+      version: 2.2.0
     tsx:
       specifier: ^4.23.15
       version: 4.23.15
@@ -83,6 +89,9 @@ importers:
       random:
         specifier: 'catalog:'
         version: 5.5.1
+      tinypool:
+        specifier: 'catalog:'
+        version: 2.2.0
       tsx:
         specifier: 'catalog:'
         version: 4.23.15
@@ -95,6 +104,9 @@ importers:
 
   packages/framework:
     dependencies:
+      fastpriorityqueue:
+        specifier: 'catalog:'
+        version: 0.8.0
       hookable:
         specifier: 'catalog:'
         version: 6.1.2
@@ -1399,6 +1411,9 @@ packages:
   fast-wrap-ansi@0.2.2:
     resolution: {integrity: sha512-7F2Fl+TjRSenLqlU3UjSH0iyqopqoZIu7eZVpEirP2g1GtWa2G/ecEmBdgz31+Mxr+ELclgg6sokpSFIQiZ02Q==}
 
+  fastpriorityqueue@0.8.0:
+    resolution: {integrity: sha512-Nli86GbwvbI15pK0wQJSfrh+kMDQI9tae1QFO1HHgUdABL+WK/5rsFv0m/NfwHQmxTPRDhJTgHKRwfstJMxoSA==}
+
   fault@2.0.1:
     resolution: {integrity: sha512-WtySTkS4OKev5JtpHXnib4Gxiurzh5NCGvWrFaZ34m6JehfTUhKZvn9njTfw48t6JumVQOmrKqpmGcdwxnhqBQ==}
 
@@ -2031,6 +2046,10 @@ packages:
   tinyglobby@0.2.17:
     resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
     engines: {node: '>=12.0.0'}
+
+  tinypool@2.2.0:
+    resolution: {integrity: sha512-jBrmx4lYmaC9k/mgPbylxs7kBUxHtD8256up+HjLaDFfXScKJQyil+SWXSvhAtT7XHo+yTVlpB81PGmHP8oLSQ==}
+    engines: {node: ^20.0.0 || >=22.0.0}
 
   to-valid-identifier@1.0.0:
     resolution: {integrity: sha512-41wJyvKep3yT2tyPqX/4blcfybknGB4D+oETKLs7Q76UiPqRpUJK3hr1nxelyYO0PHKVzJwlu0aCeEAsGI6rpw==}
@@ -3768,6 +3787,8 @@ snapshots:
     dependencies:
       fast-string-width: 3.0.2
 
+  fastpriorityqueue@0.8.0: {}
+
   fault@2.0.1:
     dependencies:
       format: 0.2.2
@@ -4541,6 +4562,8 @@ snapshots:
     dependencies:
       fdir: 6.5.0(picomatch@4.0.7)
       picomatch: 4.0.7
+
+  tinypool@2.2.0: {}
 
   to-valid-identifier@1.0.0:
     dependencies:

@@ -1,13 +1,13 @@
 import type { Random } from 'random'
 import assert from 'node:assert/strict'
 import quantile from '@stdlib/stats/base/dists/normal/quantile'
-import p_10 from '../../../assets/cloudping/1M-p_10.json'
-import p_25 from '../../../assets/cloudping/1M-p_25.json'
-import p_50 from '../../../assets/cloudping/1M-p_50.json'
-import p_75 from '../../../assets/cloudping/1M-p_75.json'
-import p_90 from '../../../assets/cloudping/1M-p_90.json'
-import p_98 from '../../../assets/cloudping/1M-p_98.json'
-import p_99 from '../../../assets/cloudping/1M-p_99.json'
+import p_10 from '../../../../assets/cloudping/1M-p_10.json'
+import p_25 from '../../../../assets/cloudping/1M-p_25.json'
+import p_50 from '../../../../assets/cloudping/1M-p_50.json'
+import p_75 from '../../../../assets/cloudping/1M-p_75.json'
+import p_90 from '../../../../assets/cloudping/1M-p_90.json'
+import p_98 from '../../../../assets/cloudping/1M-p_98.json'
+import p_99 from '../../../../assets/cloudping/1M-p_99.json'
 
 export type RegionName = keyof typeof p_10['data']
 export const regionsAll = Object.keys(p_10.data) as RegionName[]
@@ -75,7 +75,7 @@ for (const from of regionsAll) {
   }
 }
 
-export function cloudping(random: Random) {
+export function cloudpingLatency(random: Random) {
   const normal = random.normal()
 
   return (from: RegionName, to: RegionName) => {

@@ -1,11 +1,12 @@
 import type { Algorithm } from '@leader-eval/framework'
-import type { RegionName } from './cloudping'
+import type { RegionName } from './latency'
 import { Network, Simulator } from '@leader-eval/framework'
 import { Random } from 'random'
-import { cloudping } from './cloudping'
+import { algorithms } from '../algorithm'
+import { cloudpingLatency } from './latency'
 
 export async function simulateCloudping(algorithm: Algorithm, regions: RegionName[]) {
-  const cp = cloudping(new Random())
+  const cp = cloudpingLatency(new Random())
 
   const network = new Network<RegionName>()
   for (const region of regions)
@@ -25,6 +26,7 @@ export async function simulateCloudping(algorithm: Algorithm, regions: RegionNam
     },
     maxSteps: 10 * regions.length ** 3,
     seed: Math.random(),
+    disableLog: true,
   })
 
   let msgCount = 0
@@ -38,4 +40,17 @@ export async function simulateCloudping(algorithm: Algorithm, regions: RegionNam
     time: simulator.getTime(),
     msgCount,
   }
+}
+
+interface TaskParam {
+  name: string
+  regions: RegionName[]
+}
+
+export default async ({ name, regions }: TaskParam) => {
+  if (!(name in algorithms))
+    throw new Error(`Unknown algorithm ${name}`)
+  const algorithm = algorithms[name as keyof typeof algorithms]
+
+  return simulateCloudping(algorithm, regions)
 }

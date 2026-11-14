@@ -2,12 +2,20 @@ import type { Hookable, HookKeys, InferCallback } from 'hookable'
 import type { Algorithm, NodeRef, NodeThis, Rpc, RpcResponse } from './algorithm'
 import type { Network, NetworkNode } from './network'
 import type { MaybePromise } from './util'
+import FastPriorityQueue from 'fastpriorityqueue'
 import { createHooks } from 'hookable'
 import { Random } from 'random'
 
 interface Scheduled {
   time: number
+  seq: number
   run: () => void
+}
+
+function createQueue() {
+  return new FastPriorityQueue<Scheduled>(
+    (a, b) => a.time < b.time || (a.time === b.time && a.seq < b.seq),
+  )
 }
 
 interface Abortable {
@@ -30,6 +38,7 @@ export interface SimulatorConfig<NodeMetaT> {
   }
   maxSteps: number
   seed?: number | string
+  disableLog?: boolean
 }
 
 export interface SimulatorHookContext<NodeMetaT> {
@@ -52,7 +61,9 @@ export class Simulator<NodeMetaT> {
   private time = 0
   private logs: string[] = []
 
-  private queue: Scheduled[] = []
+  private queue = createQueue()
+  private seq = 0
+
   private inFlight = new Map<number, Set<Abortable>>()
   private timers = new Map<number, Set<number>>()
   private timerHandles = 0
@@ -81,7 +92,7 @@ export class Simulator<NodeMetaT> {
     this.time = 0
     this.logs = []
 
-    this.queue = []
+    this.queue = createQueue()
     this.inFlight = new Map()
     this.timers = new Map()
     this.leaders = new Map()
@@ -147,7 +158,7 @@ export class Simulator<NodeMetaT> {
     else {
       this.leaders.delete(id)
     }
-    this.logs.push(`[${this.timestamp()}] ${id} assertLeader(${leader?.id})`)
+    this.logLine(`${id} assertLeader(${leader?.id})`)
     this.callHook(
       'leader:assert',
       this.nodes[id].netNode,
@@ -158,7 +169,7 @@ export class Simulator<NodeMetaT> {
     const agreed = this.leaders.get(0)
     if (agreed !== undefined && this.nodes.every(node => this.leaders.get(node.id) === agreed)) {
       this.finished = true
-      this.logs.push(`[${this.timestamp()}] leader settled: ${agreed}`)
+      this.logLine(`leader settled: ${agreed}`)
       this.callHook('leader:consent', this.nodes[agreed].netNode)
     }
   }
@@ -185,12 +196,7 @@ export class Simulator<NodeMetaT> {
       if (!node)
         return
 
-      const logLine = this.logs.length
-      const name = f.name || 'timeout'
-      this.logs.push(`[${this.timestamp()}] ${id} ${name}`)
-      const note = (text: string) => {
-        this.logs[logLine] += ` ${text}`
-      }
+      const note = this.logLine(`${id} ${f.name || 'timeout'}`)
 
       try {
         await f.call(node.self)
@@ -259,11 +265,7 @@ export class Simulator<NodeMetaT> {
   ): Promise<RpcResponse<T>> {
     const latency = this.latency(from, to)
 
-    const logLine = this.logs.length
-    this.logs.push(`[${this.timestamp()}] ${from.id} -> ${to.id} ${label}`)
-    const note = (text: string) => {
-      this.logs[logLine] += ` ${text}`
-    }
+    const note = this.logLine(`${from.id} -> ${to.id} ${label}`)
 
     const senderRef = to.self.network.find(ref => ref.id === from.id)!
     const targetRef = from.self.network.find(ref => ref.id === to.id)!
@@ -374,13 +376,7 @@ export class Simulator<NodeMetaT> {
     if (time === Infinity)
       return
 
-    const event = { time, run }
-
-    const index = this.queue.findIndex(scheduled => scheduled.time > time)
-    if (index === -1)
-      this.queue.push(event)
-    else
-      this.queue.splice(index, 0, event)
+    this.queue.add({ time, seq: this.seq++, run })
   }
 
   async run() {
@@ -389,20 +385,38 @@ export class Simulator<NodeMetaT> {
     this.startNodes()
     await this.flush()
 
-    let steps = 0
-    while (!this.finished) {
-      const event = this.queue.shift()
-      if (!event)
-        break
+    await new Promise<void>((resolve, reject) => {
+      let steps = 0
+      let done = false
 
-      if (++steps > this.config.maxSteps)
-        throw new Error(`simulation did not terminate within ${this.config.maxSteps} steps`)
+      const step = () => {
+        if (done)
+          return
 
-      this.time = event.time
-      event.run()
+        const event = this.finished
+          ? undefined
+          : this.queue.poll()
+        if (!event) {
+          done = true
+          return resolve()
+        }
 
-      await this.flush()
-    }
+        if (++steps > this.config.maxSteps) {
+          done = true
+          return reject(new Error(`simulation did not terminate within ${this.config.maxSteps} steps`))
+        }
+
+        this.time = event.time
+        event.run()
+      }
+
+      const batch = () => {
+        for (let i = 0; i < 1024; i++)
+          setImmediate(step)
+        setImmediate(() => done || batch())
+      }
+      batch()
+    })
 
     if (this.failure !== undefined)
       throw this.failure
@@ -427,7 +441,7 @@ export class Simulator<NodeMetaT> {
     if (error instanceof AbortError)
       return
 
-    this.logs.push(`[${this.timestamp()}] ${id} threw: ${error}`)
+    this.logLine(`${id} threw: ${error}`)
     this.failure ??= error
     this.finished = true
   }
@@ -454,6 +468,18 @@ export class Simulator<NodeMetaT> {
 
   getTime(): number {
     return this.time
+  }
+
+  private logLine(log: string): (append: string) => void {
+    if (this.config.disableLog)
+      return () => {}
+
+    const line = this.logs.length
+    this.logs.push(`[${this.timestamp()}] ${log}`)
+
+    return (append: string) => {
+      this.logs[line] += ` ${append}`
+    }
   }
 
   private timestamp() {

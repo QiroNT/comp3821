@@ -16,9 +16,11 @@ catalog:
   '@stdlib/stats': ^0.4.1
   '@types/node': ^26.6.6
   eslint: ^10.14.0
+  fastpriorityqueue: ^0.8.0
   hookable: ^6.1.2
   it-parallel: ^3.0.16
   random: ^5.5.1
+  tinypool: ^2.2.0
   tsx: ^4.23.15
   typescript: ^6.0.3
   vitest: ^5.1.0
