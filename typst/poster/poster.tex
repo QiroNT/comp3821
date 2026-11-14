@@ -42,10 +42,10 @@
         \textbf{Worst Case Time Complexity:} $O(n^2)$\\
         \textbf{Key Features:}
         \begin{itemize}
-          \item Node will try to inform all nodes with a greater ID that it wants to hold an election.
-          \item Any response from a greater node leads a sender to concede, this greater node will hold its own election.
+          \item A node requests nodes with a higher ID that it wants an election.
+          \item Any response from a greater node makes a sender concede, this greater node holds a new election.
           \item A timed-out response from all greater nodes indicates that a node is the new leader, and it informs other nodes.
-          \item If the initiator node has the greated available ID, Bully gets a best case time complexity of $O(n)$.
+          \item When the initiator has the greatest ID, Bully runs in $O(n)$.
         \end{itemize}
       \end{mybluebox}
       \begin{mybluebox}{Paxos Algorithm}
@@ -62,10 +62,10 @@
         \textbf{Worst Case Time Complexity:} $O(n^2)$\\
         \textbf{Key Features:}
         \begin{itemize}
-          \item Intended as successor to Paxos
+          \item Intended as successor to Paxos.
           \item All nodes begin as followers.
-          \item Random exponential backoff is used in conjunction with timeouts to reduce collisions.
-          \item Candidates broadcast a requestVote() to all nodes and receive results for a best case time complexity $O(n)$.
+          \item Random exponential backoff is used along with timeouts to reduce collisions.
+          \item Candidates broadcast requestVote() to all nodes and receive results for a best case time complexity $O(n)$.
         \end{itemize}
         \begin{figure}
           \include{raftState.tex}
