@@ -1,5 +1,6 @@
 import type { Algorithm } from '@leader-eval/framework'
 import { fn, rpc } from '@leader-eval/framework'
+import parallel from 'it-parallel'
 
 /* eslint prefer-arrow-callback: "off", ts/no-use-before-define: "off" */
 
@@ -88,18 +89,25 @@ const election = fn(async function election() {
 
   // request votes from every node
   let network_size = this.network.length
-  const responses = await this.callAll(this.network, requestVote, this.term)
-  for (const res of responses) {
+  const responses = parallel(this.network.map(node => () => node.call(requestVote, this.term)))
+
+  let win = false
+  for await (const res of responses) {
     const { status, response } = res
     if (status === 'timeout') {
       // Assume one less voter
       network_size -= 1
     }
     votes += response ? 1 : 0
+
+    if (votes > network_size / 2) {
+      win = true
+      break
+    }
   }
 
   // become leader if win
-  if (votes > network_size / 2) {
+  if (win) {
     this.state = RaftState.LEADER
     // send initial heartbeat messages
     this.callAll(this.network, appendEntry, this.term)
@@ -110,6 +118,7 @@ const election = fn(async function election() {
     // remain as a candidate
     this.state = RaftState.CANDIDATE
   }
+
   // no matter the result, a timeout starts
   resetTimeout.call(this)
 })
@@ -153,7 +162,7 @@ const onStart = fn(async function onStart() {
   this.state = RaftState.FOLLOWER
   this.term = 0
   // the node will now wait to timeout.
-  resetTimeout.call(this, this.random.int(10, 35))
+  resetTimeout.call(this, this.random.int(0, 25))
 })
 
 // algorithm end

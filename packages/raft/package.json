@@ -5,6 +5,7 @@
   "main": "src/index.ts",
   "scripts": {},
   "dependencies": {
-    "@leader-eval/framework": "workspace:*"
+    "@leader-eval/framework": "workspace:*",
+    "it-parallel": "catalog:"
   }
 }

@@ -24,6 +24,9 @@ catalogs:
     hookable:
       specifier: ^6.1.2
       version: 6.1.2
+    it-parallel:
+      specifier: ^3.0.16
+      version: 3.0.16
     random:
       specifier: ^5.5.1
       version: 5.5.1
@@ -110,6 +113,9 @@ importers:
       '@leader-eval/framework':
         specifier: workspace:*
         version: link:../framework
+      it-parallel:
+        specifier: 'catalog:'
+        version: 3.0.16
 
   packages/scripts:
     dependencies:
@@ -1512,6 +1518,9 @@ packages:
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
 
+  it-parallel@3.0.16:
+    resolution: {integrity: sha512-qr3nTgj4fraSfr6Ix9JkHsy/Yb/4vmS3QIAu3fsX52r2SOTLbohXoixKp6AIhTJcorpKwjP0VFcpHr5V54jivA==}
+
   js-yaml@5.5.0:
     resolution: {integrity: sha512-paNr4LFIFPjeeSmwNYdrb8FafLLG/Cr2Af3GjbsHJ5CxIjH4r0c2emlmRdAtpPAieP1gRVzk6buBbVP5gBMGAg==}
     hasBin: true
@@ -1827,6 +1836,10 @@ packages:
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
     engines: {node: '>= 0.8.0'}
+
+  p-defer@4.0.1:
+    resolution: {integrity: sha512-Mr5KC5efvAK5VUptYEIopP1bakB85k2IWXaRC0rsh1uwn1L6M0LVml8OIQ4Gudg4oyZakf7FmeRLkMMtZW1i5A==}
+    engines: {node: '>=12'}
 
   p-limit@3.1.0:
     resolution: {integrity: sha512-TYOanM3wGwNGsZN2cVTYPArw454xnXj5qmWF1bEoAc4+cU/ol7GVh7odevjp1FNHduHc3KZMcFduxU5Xc6uJRQ==}
@@ -3845,6 +3858,10 @@ snapshots:
 
   isexe@2.0.0: {}
 
+  it-parallel@3.0.16:
+    dependencies:
+      p-defer: 4.0.1
+
   js-yaml@5.5.0:
     dependencies:
       argparse: 3.0.4
@@ -4341,6 +4358,8 @@ snapshots:
       prelude-ls: 1.2.1
       type-check: 0.4.0
       word-wrap: 1.2.5
+
+  p-defer@4.0.1: {}
 
   p-limit@3.1.0:
     dependencies:

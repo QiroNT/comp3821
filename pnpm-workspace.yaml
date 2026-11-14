@@ -17,6 +17,7 @@ catalog:
   '@types/node': ^26.6.6
   eslint: ^10.14.0
   hookable: ^6.1.2
+  it-parallel: ^3.0.16
   random: ^5.5.1
   tsx: ^4.23.15
   typescript: ^6.0.3
