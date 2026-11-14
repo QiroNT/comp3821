@@ -1,0 +1,14 @@
+\begin{tikzpicture}[node distance=7cm,thick,auto, initial text={}, scale=1]
+    % draw the states
+    \node[state, initial, fill=unsw@green] (f) {Follower}; % note the semicolon
+    \node[state, fill=unsw@blue] (c) [right of=f] {Candidate};
+    \node[state, fill=unsw@red] (l) [right of=c] {Leader};
+    % draw the edges
+    \path[->] 
+    (f) edge [below] node {times out} (c)
+    (c) 
+    edge [loop above] node {times out} ()
+    edge [] node {gains majority} (l)
+    edge [bend right, above] node {discovers leader} (f)
+    (l) edge [bend left] node {discovers higher term leader} (f);
+\end{tikzpicture}
