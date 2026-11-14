@@ -5,34 +5,74 @@ import incrmeanstdev from '@stdlib/stats/incr/meanstdev'
 import { Tinypool } from 'tinypool'
 import { algorithms } from '../algorithm'
 import { regionsAll, regionsDefault } from '../cloudping/latency'
+import { measurements, openDb } from './db'
 
 const loops = 200
+const multiplies = [
+  1,
+  2,
+  4,
+  8,
+  12,
+  16,
+  24,
+  32,
+  48,
+  64,
+  80,
+  96,
+  112,
+  128,
+]
 
+const startedAt = Date.now()
+const db = openDb()
 const pool = new Tinypool({
   filename: new URL('../cloudping/worker.ts', import.meta.url),
 })
 
-async function each(name: string, regions: RegionName[]) {
+async function each(
+  dataset: string,
+  algorithm: string,
+  regions: RegionName[],
+  multiplier: number,
+) {
+  const header = `Measuring ${algorithm} ${multiplier}x`
   const p = isTTY(stdout)
     ? progress({ max: loops })
     : undefined
-  p?.start(`Measuring ${name}`)
+  p?.start(header)
 
   const sampleTime = incrmeanstdev()
   const sampleMsg = incrmeanstdev()
 
   let count = 0
+  const rows: (typeof measurements.$inferInsert)[] = []
   const promises = []
   for (let i = 0; i < loops; i++) {
-    const promise = pool.run({ name, regions }).then((r) => {
+    const promise = pool.run({ name: algorithm, regions }).then((r) => {
       sampleTime(r.time)
       sampleMsg(r.msgCount)
 
-      p?.advance(1, `Measuring ${name} (${++count}/${loops})`)
+      rows.push({
+        dataset,
+        startedAt,
+        algorithm,
+        multiplier,
+        nodes: regions.length,
+        run: i,
+        time: r.time,
+        msgCount: r.msgCount,
+      })
+
+      p?.advance(1, `${header} (${++count}/${loops})`)
     })
     promises.push(promise)
   }
   await Promise.all(promises)
+
+  rows.sort((a, b) => a.run - b.run)
+  db.insert(measurements).values(rows).run()
 
   p?.clear()
 
@@ -40,32 +80,34 @@ async function each(name: string, regions: RegionName[]) {
   const [meanM, stddevM] = Array.from(sampleMsg()!)
 
   log.info([
-    `${name}:`,
+    `${algorithm} ${multiplier}x:`,
     `time: ${meanT.toFixed(2)}ms, stddev ${stddevT.toFixed(2)}`,
     `message: ${meanM.toFixed(2)}, stddev ${stddevM.toFixed(2)}`,
   ].join('\n'))
 }
 
-async function iter(regions: RegionName[]) {
-  for (const name of Object.keys(algorithms))
-    await each(name, regions)
+async function iter(dataset: string, regions: RegionName[]) {
+  log.info(`Testing ${dataset} regions (${regions.length} nodes)`)
+
+  for (const m of multiplies) {
+    const r = Array.from({ length: m }).fill(0).map(() => regions).flat()
+
+    for (const name of Object.keys(algorithms))
+      await each(dataset, name, r, m)
+  }
 }
 
-log.info(`Testing default regions (${regionsDefault.length} nodes)`)
-await iter(regionsDefault)
+await iter('default', regionsDefault)
 
-log.info(`Testing all regions (${regionsAll.length} nodes)`)
-await iter(regionsAll)
+await iter('all', regionsAll)
 
 const regionsSkewed = [
   ...Array.from<RegionName>({ length: 19 }).fill('us-east-1'),
   ...Array.from<RegionName>({ length: 1 }).fill('eu-west-1'),
 ]
-log.info(`Testing 95%/5% regions (${regionsSkewed.length} nodes)`)
-await iter(regionsSkewed)
+await iter('skewed', regionsSkewed)
 
-const regionsSingle = Array.from<RegionName>({ length: 200 }).fill('us-east-1')
-log.info(`Testing single region (${regionsSingle.length} nodes)`)
-await iter(regionsSingle)
+const regionsSingle = Array.from<RegionName>({ length: 20 }).fill('us-east-1')
+await iter('single', regionsSingle)
 
 await pool.destroy()

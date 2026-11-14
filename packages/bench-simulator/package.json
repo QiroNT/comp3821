@@ -4,7 +4,8 @@
   "private": true,
   "main": "src/cli/index.ts",
   "scripts": {
-    "bench": "tsx src/cli/index.ts"
+    "bench": "tsx src/cli/index.ts",
+    "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
     "@clack/prompts": "catalog:",
@@ -13,8 +14,12 @@
     "@leader-eval/paxos": "workspace:*",
     "@leader-eval/raft": "workspace:*",
     "@stdlib/stats": "catalog:",
+    "drizzle-orm": "catalog:",
     "random": "catalog:",
     "tinypool": "catalog:",
     "tsx": "catalog:"
+  },
+  "devDependencies": {
+    "drizzle-kit": "catalog:"
   }
 }

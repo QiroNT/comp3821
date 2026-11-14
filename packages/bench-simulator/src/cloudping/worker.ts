@@ -6,10 +6,11 @@ import { algorithms } from '../algorithm'
 import { cloudpingLatency } from './latency'
 
 export async function simulateCloudping(algorithm: Algorithm, regions: RegionName[]) {
-  const cp = cloudpingLatency(new Random())
+  const random = new Random()
+  const cp = cloudpingLatency(random)
 
   const network = new Network<RegionName>()
-  for (const region of regions)
+  for (const region of random.shuffle(regions))
     network.addNode(region)
 
   network.fullyConnect((from, to) => {

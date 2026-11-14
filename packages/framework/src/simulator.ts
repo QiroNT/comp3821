@@ -1,10 +1,11 @@
 import type { Hookable, HookKeys, InferCallback } from 'hookable'
 import type { Algorithm, NodeRef, NodeThis, Rpc, RpcResponse } from './algorithm'
-import type { Network, NetworkNode } from './network'
+import type { Network, NetworkNeighbor, NetworkNode } from './network'
 import type { MaybePromise } from './util'
 import FastPriorityQueue from 'fastpriorityqueue'
 import { createHooks } from 'hookable'
 import { Random } from 'random'
+import { noop } from './util'
 
 interface Scheduled {
   time: number
@@ -18,16 +19,85 @@ function createQueue() {
   )
 }
 
-interface Abortable {
-  abort: () => void
-}
+// for debugging, add `extends Error`
+class AbortError { }
 
-class AbortError extends Error { }
+class Exchange<T> {
+  private waiter: PromiseWithResolvers<RpcResponse<T>> | undefined = Promise.withResolvers()
+  private settled = false
+
+  constructor(
+    private pending: Set<Exchange<unknown>>,
+    private note: (append: string) => void,
+    private noteError: (error: unknown) => void,
+    readonly senderRef: NodeRef,
+    readonly targetRef: NodeRef,
+    private f: ((senderRef: NodeRef, targetRef: NodeRef) => MaybePromise<RpcResponse<T>>) | undefined,
+  ) {
+    pending.add(this as Exchange<unknown>)
+  }
+
+  get promise() {
+    return this.waiter!.promise
+  }
+
+  timeout() {
+    this.finish({ target: this.targetRef, status: 'timeout' })
+  }
+
+  async respond() {
+    const { f, senderRef, targetRef } = this
+    this.f = undefined
+
+    // we still run the content even when it's aborted, just not returning it
+    const result = Promise.try(f!, senderRef, targetRef)
+    result.catch(this.noteError)
+
+    if (this.settle())
+      this.finish(await result)
+  }
+
+  abort() {
+    if (!this.settle() || !this.waiter)
+      return
+
+    const { promise, reject } = this.waiter
+    this.waiter = undefined
+
+    promise.catch(noop)
+
+    this.note('aborted')
+    reject(new AbortError())
+  }
+
+  private settle() {
+    if (this.settled)
+      return false
+
+    this.settled = true
+    this.pending.delete(this as Exchange<unknown>)
+    return true
+  }
+
+  private finish(response: RpcResponse<T>) {
+    if (!this.waiter)
+      return
+
+    const { resolve } = this.waiter
+    this.waiter = undefined
+
+    this.note(response.status)
+    resolve(response)
+  }
+}
 
 interface SimulatorNode<NodeMetaT> {
   id: number
   self: NodeThis
   netNode: NetworkNode<NodeMetaT>
+  links: NetworkNeighbor<NodeMetaT>[]
+  refs: NodeRef[]
+  inFlight: Set<Exchange<unknown>>
 }
 
 export interface SimulatorConfig<NodeMetaT> {
@@ -64,7 +134,6 @@ export class Simulator<NodeMetaT> {
   private queue = createQueue()
   private seq = 0
 
-  private inFlight = new Map<number, Set<Abortable>>()
   private timers = new Map<number, Set<number>>()
   private timerHandles = 0
   private leaders = new Map<number, number>()
@@ -80,25 +149,36 @@ export class Simulator<NodeMetaT> {
     const { nodes } = this.config.network
     this.nodes = nodes.map((node, id) => this.createNode(id, node))
 
-    for (const node of this.nodes) {
-      const neighbors = new Set([...nodes[node.id].neighbors]
-        .map(n => nodes.indexOf(n.node)))
-
-      node.self.network = [...neighbors]
-        .sort((a, b) => a - b)
-        .map(id => this.createRef(node, this.nodes[id]))
-    }
+    const ids = new Map(nodes.map((node, id) => [node, id]))
+    for (const node of this.nodes)
+      this.connect(node, ids)
 
     this.time = 0
     this.logs = []
 
     this.queue = createQueue()
-    this.inFlight = new Map()
     this.timers = new Map()
     this.leaders = new Map()
 
     this.finished = false
     this.failure = undefined
+  }
+
+  private connect(
+    node: SimulatorNode<NodeMetaT>,
+    ids: Map<NetworkNode<NodeMetaT>, number>,
+  ) {
+    for (const link of node.netNode.neighbors) {
+      const id = ids.get(link.node)!
+      node.links[id] = link
+    }
+
+    node.self.network = []
+    node.links.forEach((_, id) => {
+      const ref = this.createRef(node, this.nodes[id])
+      node.refs[id] = ref
+      node.self.network.push(ref)
+    })
   }
 
   private createNode(
@@ -133,20 +213,18 @@ export class Simulator<NodeMetaT> {
       id: self.id,
       self,
       netNode,
+      links: [],
+      refs: [],
+      inFlight: new Set(),
     }
   }
 
   private abortOutstanding(id: number): number {
-    const pending = this.inFlight.get(id)
-    if (!pending?.size)
-      return 0
+    const { inFlight } = this.nodes[id]
+    const aborted = inFlight.size
 
-    let aborted = 0
-    for (const abortable of pending) {
-      abortable.abort()
-      pending.delete(abortable)
-      aborted++
-    }
+    for (const exchange of inFlight)
+      exchange.abort()
 
     return aborted
   }
@@ -267,8 +345,8 @@ export class Simulator<NodeMetaT> {
 
     const note = this.logLine(`${from.id} -> ${to.id} ${label}`)
 
-    const senderRef = to.self.network.find(ref => ref.id === from.id)!
-    const targetRef = from.self.network.find(ref => ref.id === to.id)!
+    const senderRef = to.refs[from.id]
+    const targetRef = from.refs[to.id]
 
     // we treat invalid latencies as disconnected
     if (!Number.isFinite(latency)) {
@@ -276,100 +354,37 @@ export class Simulator<NodeMetaT> {
       return Promise.resolve({ target: targetRef, status: 'timeout' })
     }
 
-    // schedule a timeout response
-    const timeout = this.schedule(
+    const exchange = new Exchange<T>(
+      from.inFlight,
+      note,
+      error => this.noteError(from.id, error),
+      senderRef,
+      targetRef,
+      f,
+    )
+
+    // schedule a timeout and the response
+    this.at(
       this.time + this.config.params.replyTimeout,
-      () => ({ target: targetRef, status: 'timeout' } satisfies RpcResponse<T>),
+      exchange.timeout.bind(exchange),
     )
-
-    // schedule the actual response
-    const response = this.scheduleAbortable(
-      from.id,
+    this.at(
       this.time + Math.max(0, latency),
-      () => f(senderRef, targetRef),
+      exchange.respond.bind(exchange),
     )
 
-    const ret = Promise.race([timeout, response])
-    ret
-      .then((res) => {
-        note(res.status)
-      })
-      .catch((error) => {
-        note(error instanceof AbortError
-          ? 'aborted'
-          : 'errored')
-        this.noteError(from.id, error)
-      })
-
-    return ret
+    return exchange.promise
   }
 
   private latency(
     from: SimulatorNode<NodeMetaT>,
     to: SimulatorNode<NodeMetaT>,
   ): number {
-    const link = Array.from(from.netNode.neighbors)
-      .find(neighbor => neighbor.node === to.netNode)
+    const link = from.links[to.id]
     if (!link)
       throw new Error(`node ${from.id} tried to call non-neighboring node ${to.id}`)
 
     return link.latency(from.netNode, to.netNode)
-  }
-
-  private scheduleAbortable<T>(
-    id: number,
-    at: number,
-    f: (aborted: boolean) => T,
-  ): Promise<Awaited<T>> {
-    const { promise, resolve, reject } = Promise.withResolvers<Awaited<T>>()
-
-    let settled = false
-
-    const abortable = {
-      abort: () => {
-        if (settled)
-          return
-        settled = true
-        this.inFlight.get(id)?.delete(abortable)
-
-        reject(new AbortError())
-      },
-    } satisfies Abortable
-
-    let pending = this.inFlight.get(id)
-    if (!pending) {
-      pending = new Set()
-      this.inFlight.set(id, pending)
-    }
-
-    pending.add(abortable)
-
-    this.at(at, async () => {
-      // we still run the content even when it's aborted, just not returning it
-      const r = Promise.try(f, settled)
-      r.catch((error) => {
-        this.noteError(id, error)
-      })
-
-      if (settled)
-        return
-      settled = true
-      this.inFlight.get(id)?.delete(abortable)
-
-      resolve(await r)
-    })
-
-    return promise
-  }
-
-  private schedule<T>(at: number, f: () => T): Promise<T> {
-    const { promise, resolve } = Promise.withResolvers<T>()
-
-    this.at(at, () => {
-      resolve(f())
-    })
-
-    return promise
   }
 
   private at(time: number, run: () => void) {
@@ -472,7 +487,7 @@ export class Simulator<NodeMetaT> {
 
   private logLine(log: string): (append: string) => void {
     if (this.config.disableLog)
-      return () => {}
+      return noop
 
     const line = this.logs.length
     this.logs.push(`[${this.timestamp()}] ${log}`)
