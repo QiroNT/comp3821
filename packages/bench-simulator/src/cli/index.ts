@@ -48,3 +48,14 @@ await iter(regionsDefault)
 
 log.info(`Testing all regions (${regionsAll.length} nodes)`)
 await iter(regionsAll)
+
+const regionsSkewed = [
+  ...Array.from<RegionName>({ length: 19 }).fill('us-east-1'),
+  ...Array.from<RegionName>({ length: 1 }).fill('eu-west-1'),
+]
+log.info(`Testing 95%/5% regions (${regionsSkewed.length} nodes)`)
+await iter(regionsSkewed)
+
+const regionsSingle = Array.from<RegionName>({ length: 100 }).fill('us-east-1')
+log.info(`Testing single region (${regionsSingle.length} nodes)`)
+await iter(regionsSingle)
