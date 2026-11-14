@@ -14,13 +14,15 @@
 %\usepackage[utf8]{inputenc}
 \usepackage[orientation=portrait,size=a2,scale=1.4,debug]{beamerposter}
 
+\usetikzlibrary{automata} % Import library for drawing automata
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 %\graphicspath{{figures/}}
 
 \title{Emperical Evaluation of Leader Election Algorithms}
 \author{Akindu Jayatilleke (z5702573) \and Chino Zhou (z5645020)\\ Edmond Cheng (z5689122) \and Gia Phat Bui (z5717025)\\ Lachlan Martin (z5691769)}
-\institute{Mentor: mentor name\\
-  Group: group number}
+\institute{Mentor: Yuhangn Guo\\
+  Group: 44}
 \date{}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
@@ -33,18 +35,32 @@
       \begin{mybox}{What are Leader Election Algorithms?}
         
       \end{mybox}
-      \begin{myredbox}{Consensus Algorithms can be Leader Elections!}
-        
-      \end{myredbox}
       \begin{mybluebox}{Bully Algorithm}
-        
-      \end{mybluebox}
-      \begin{mybluebox}{Raft Algorithm}
         
       \end{mybluebox}
       \begin{mybluebox}{Paxos Algorithm}
         
       \end{mybluebox}
+      \begin{mybluebox}{Raft Algorithm}
+        \textbf{Worst Case Time Complexity:} $O(n^2)$\\
+        \textbf{Key Features:}
+        \begin{itemize}
+          \item Intended as successor to Paxos
+          \item All nodes begin as followers.
+          \item Random exponential backoff is used in conjunction with timeouts to reduce collisions.
+          \item Candidates broadcast a requestVote() to all nodes and receive results for a best case time complexity $O(n)$.
+        \end{itemize}
+        \begin{figure}
+          \include{raftState.tex}
+          \caption{A state diagram for the raft algorithm}
+        \end{figure}
+      \end{mybluebox}
+      \begin{myredbox}{Consensus Algorithms can be Leader Elections!}
+        Technically, the Raft and Paxos algorithms are consensus algorithms, not leader election algorithms.
+        However, in the case of the Bully algorithm, only the initial leader election phase needs to utilised and the log replication phase can be ignored.
+        As for the Paxos algorithm, we set the values being agreed upon are not database entries but information about who is a "leader".
+        Thus we can slightly modify these algorithms to focus on leader elections without any correctness or performance change to the algorithms themselves.
+      \end{myredbox}
     \end{column}
     \begin{column}{.5\linewidth}
       \begin{mytealbox}{Testing framework}
