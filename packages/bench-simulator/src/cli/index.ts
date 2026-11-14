@@ -1,4 +1,5 @@
 import type { RegionName } from '../cloudping/latency'
+import { availableParallelism } from 'node:os'
 import { stdout } from 'node:process'
 import { isTTY, log, progress } from '@clack/prompts'
 import incrmeanstdev from '@stdlib/stats/incr/meanstdev'
@@ -24,14 +25,14 @@ const multiplies = [
   112,
   128,
 ]
+const limiter = 500_000
 
+const cpuCount = availableParallelism()
 const startedAt = Date.now()
 const db = openDb()
-const pool = new Tinypool({
-  filename: new URL('../cloudping/worker.ts', import.meta.url),
-})
 
 async function each(
+  pool: Tinypool,
   dataset: string,
   algorithm: string,
   regions: RegionName[],
@@ -92,8 +93,15 @@ async function iter(dataset: string, regions: RegionName[]) {
   for (const m of multiplies) {
     const r = Array.from({ length: m }).fill(0).map(() => regions).flat()
 
+    const pool = new Tinypool({
+      filename: new URL('../cloudping/worker.ts', import.meta.url),
+      maxThreads: Math.floor(Math.min(limiter / (r.length ** 2), 1) * cpuCount),
+    })
+
     for (const name of Object.keys(algorithms))
-      await each(dataset, name, r, m)
+      await each(pool, dataset, name, r, m)
+
+    await pool.destroy()
   }
 }
 
@@ -109,5 +117,3 @@ await iter('skewed', regionsSkewed)
 
 const regionsSingle = Array.from<RegionName>({ length: 20 }).fill('us-east-1')
 await iter('single', regionsSingle)
-
-await pool.destroy()
