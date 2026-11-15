@@ -15,7 +15,7 @@
 \usepackage[orientation=portrait,size=a2,scale=1.4,debug]{beamerposter}
 
 \usetikzlibrary{automata} % Import library for drawing automata
-\usepackage[style=alphabetic]{biblatex}
+\usepackage[style=alphabetic, backend=biber]{biblatex}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 %\graphicspath{{figures/}}
@@ -37,15 +37,15 @@
       \begin{mybox}{What are Leader Election Algorithms?}
         A set of algorithms utilised when a distributed system:
         \begin{enumerate}
-          \item relies on a primary node to act as main database, coordinator, etc.
-          \item and no primary node is established
-          \item or connection to the primary node is lost; either due to timeout or network splitting.
+          \item relies on a primary node to act as main database, coordinator, etc.,
+          \item and, no primary node is established,
+          \item or, connection to the primary node is lost; either due to timeout or network splitting.
         \end{enumerate}
-        \begin{figure}
-          %find a way to draw in latex in squished form
-          \includegraphics{images/summaryDiagram.png}
-          \caption{A single leader maintains consistency, but how can the network recover from the loss of it's leader?}
-        \end{figure}
+        % \begin{figure}
+        %   %find a way to draw in latex in squished form
+        %   \includegraphics{images/summaryDiagram.png}
+        %   \caption{A single leader maintains consistency, but how can the network recover from the loss of it's leader?}
+        % \end{figure}
       \end{mybox}
       \begin{mybluebox}{Bully Algorithm}
         \textbf{Worst Case Time Complexity:} $O(n^2)$\\
@@ -74,20 +74,23 @@
           \item Intended as successor to Paxos.
           \item All nodes begin as followers.
           \item Random exponential backoff is used along with timeouts to reduce collisions.
-          \item Candidates broadcast requestVote() to all nodes and receive results for a best case time complexity $O(n)$.
+          \item Candidates broadcast requestVote() to all nodes and immediately receive a majority for a best case time complexity $O(n)$.
         \end{itemize}
         \begin{figure}
-          \include{raftState.tex}
-          \caption{A state diagram for the raft algorithm}
+            \centering
+            \include{raftState.tex}
+            \caption{A state diagram for the raft algorithm}
         \end{figure}
       \end{mybluebox}
     \end{column}
     \begin{column}{.5\linewidth}
       \begin{myredbox}{Consensus Algorithms can be Leader Elections!}
         Technically, the Raft and Paxos algorithms are consensus algorithms, not leader election algorithms.
-        However, in the case of the Bully algorithm, only the initial leader election phase needs to utilised and the log replication phase can be ignored.
-        As for the Paxos algorithm, we set the values being agreed upon are not database entries but information about who is a "leader".
-        Thus we can slightly modify these algorithms to focus on leader elections without any correctness or performance change to the algorithms themselves.
+        However without changing any correctness or performance: 
+        \begin{itemize}
+          \item Raft contains a distinct leader election phase which differs to the others.
+          \item Paxos can solve with the leader as the consensus value.
+        \end{itemize}
       \end{myredbox}
       \begin{mytealbox}{Testing framework}
         \begin{columns}

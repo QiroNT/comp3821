@@ -3,14 +3,14 @@
 \def\n{5}
 \def\regionOneSize{3}
 \def\regionTwoStart{4}
-\def\radius{2.5cm}
+\def\radius{3cm}
 %draw k-complete graph
 \foreach \i in {1,...,\n} {
     \def\vertexcolour{unsw@green}
     \ifnum \i > \regionOneSize
     \def\vertexcolour{unsw@red}
     \fi
-    \pgfmathsetmacro{\angle}{90 - (\i - 1) * (360 / \n)}
+    \pgfmathsetmacro{\angle}{162 - (\i - 1) * (180/ \n)}
     \node[vertex, fill=\vertexcolour] (v\i) at (\angle:\radius) {};
 }
 
