@@ -14,7 +14,7 @@
 %\usepackage[utf8]{inputenc}
 \usepackage[orientation=portrait,size=a2,scale=1.4,debug]{beamerposter}
 
-\usetikzlibrary{automata} % Import library for drawing automata
+\usetikzlibrary{automata,positioning,arrows.meta,fit}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 %\graphicspath{{figures/}}
@@ -104,6 +104,11 @@
             You can view our codebase at: \href{https://github.com/QiroNT/comp3821}{https://github.com/QiroNT/comp3821}
           \end{column}
         \end{columns}
+        \begin{figure}
+          \centering
+          \input{frameworkDiagram.tex}
+          \caption{How the simulation framework and benchmark runner produce measurements.}
+        \end{figure}
       \end{mytealbox}
       \begin{myorangebox}{Variables}
         We tested the all combinations of the following:

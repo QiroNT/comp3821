@@ -1,0 +1,80 @@
+\begin{center}
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  node distance=1.3cm and 3.5cm,
+  component/.style={
+    draw,
+    rounded corners,
+    thick,
+    align=center,
+    text width=4cm,
+    minimum height=1.5cm
+  },
+  flow/.style={-{Stealth[length=3mm]}, thick},
+  interaction/.style={{Stealth[length=3mm]}-{Stealth[length=3mm]}, thick}
+]
+  \node[component, fill=unsw@orange!20] (runner) {
+    \textbf{Benchmark runner}\\
+    Selects test setup
+  };
+
+  \node[component, fill=unsw@yellow!30, below=of runner] (simulator) {
+    \textbf{Simulator}\\
+    Virtual clock and event queue\\
+    Stops at leader agreement
+  };
+
+  \node[component, fill=unsw@blue!20, left=of simulator] (algorithm) {
+    \textbf{Algorithm}\\
+    Bully, Paxos or Raft\\
+    RPC handlers
+  };
+
+  \node[component, fill=unsw@green!20, below=of simulator] (network) {
+    \textbf{Network}\\
+    Nodes, topology and latency
+  };
+
+  \node[component, fill=unsw@pink!20, right=of simulator] (measurement) {
+    \textbf{Metrics}\\
+    Election time\\
+    RPC request count
+  };
+
+  \node[component, fill=unsw@purple!20, below=of measurement] (results) {
+    \textbf{Results}\\
+    Mean and standard deviation\\
+    200 runs
+  };
+
+  \node[
+    draw,
+    dashed,
+    rounded corners,
+    thick,
+    fit=(simulator)(network),
+    inner sep=12pt,
+    label={[font=\small]below:Simulation framework}
+  ] {};
+
+  \draw[flow] (runner) --
+    (simulator);
+
+  \draw[interaction] (algorithm) --
+    node[above]{Node API}
+    (simulator);
+
+  \draw[flow] (network) --
+    node[right]{latency}
+    (simulator);
+
+  \draw[flow] (simulator) --
+    node[above]{measure}
+    (measurement);
+
+  \draw[flow] (measurement) --
+    node[right]{aggregate}
+    (results);
+\end{tikzpicture}%
+}
+\end{center}
