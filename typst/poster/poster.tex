@@ -57,11 +57,8 @@
           \item has no primary node is established, and
           \item when the primary node is offline due to timeouts or network split.
         \end{enumerate}
-        % \begin{figure}
-        %   %find a way to draw in latex in squished form
-        %   % \includegraphics{images/summaryDiagram.png}
-        %   % \caption{One leader maintains consistency, but how can the network recover from the loss of its leader?}
-        % \end{figure}
+        As distributed systems such as Apache Zookeeper, Kubernetes and MongoDB implemented paradigms that depend on a leader,
+        evaluating leader election algorithms in discrete network configurations must be done when many algorithms have the worst case time complexity.
       \end{mybox}
       \begin{mybluebox}{Bully Algorithm}
         \textbf{Worst Case Time Complexity:} $O(n^2)$\\
