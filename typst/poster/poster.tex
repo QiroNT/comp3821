@@ -15,6 +15,7 @@
 \usepackage[orientation=portrait,size=a2,scale=1.4,debug]{beamerposter}
 
 \usetikzlibrary{automata} % Import library for drawing automata
+\usepackage[style=alphabetic]{biblatex}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 %\graphicspath{{figures/}}
@@ -24,6 +25,7 @@
 \institute{Mentor: Yuhang Guo\\
   Group: 44}
 \date{}
+\addbibresource{references.bib}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 % available: mytealbox, mybluebox, mypurplebox, myorangebox
@@ -123,7 +125,7 @@
         
       \end{mybox}
       \begin{mybox}{References}
-
+        \printbibliography
       \end{mybox}
     \end{column}
   \end{columns}
