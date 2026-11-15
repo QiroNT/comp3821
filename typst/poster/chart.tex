@@ -1,0 +1,40 @@
+\providecommand{\chartdb}{../../assets/bench-cloudping.sqlite}
+\providecommand{\chartdataset}{default}
+
+\pgfplotsset{
+  chart/series 0/.style={color=unsw@red, mark=*},
+  chart/series 1/.style={color=unsw@blue, mark=triangle*},
+  chart/series 2/.style={color=unsw@green, mark=square*},
+  chart/points/.style={
+    only marks, mark=*, mark size=0.9pt,
+    mark options={draw opacity=0, fill opacity=0.25},
+    forget plot,
+  },
+  chart/summary/.style={
+    line width=1.2pt, mark size=3pt,
+    mark options={draw=black, line width=0.5pt},
+    error bars/y dir=both,
+    error bars/y explicit,
+    error bars/error bar style={line width=1.2pt},
+    error bars/error mark options={rotate=90, mark size=4pt, line width=1.2pt},
+  },
+}
+
+\input|"python3 chart.py \chartdb\space\chartdataset"
+
+\begin{tikzpicture}
+  \begin{axis}[
+      xmode=log, ymode=log,
+      width=0.95\linewidth, height=0.5\linewidth,
+      enlarge x limits=0.03,
+      chart/xticks,
+      xlabel={Network size},
+      ylabel={Election time (ms)},
+      tick label style={font=\footnotesize},
+      label style={font=\normalsize},
+      grid=major,
+      legend style={at={(0.025,0.96)}, anchor=north west, fill=none, font=\small,},
+    ]
+    \chartplot
+  \end{axis}
+\end{tikzpicture}

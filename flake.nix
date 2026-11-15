@@ -21,6 +21,8 @@
             typst
             typstyle
             hayagriva
+            texliveFull
+            tex-fmt
           ];
         };
       }

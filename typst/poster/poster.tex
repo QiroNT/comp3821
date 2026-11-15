@@ -1,3 +1,5 @@
+% !TEX program = lualatex
+% !TEX options = -shell-escape -synctex=1 -interaction=nonstopmode -file-line-error "%DOC%"
 % compile with XeLaTex or LuaLaTeX (this is due to selection of specific fonts)
 % on overleaf: Menu > Settings > Compiler
 
@@ -16,6 +18,8 @@
 
 \usetikzlibrary{automata} % Import library for drawing automata
 \usepackage[style=alphabetic, backend=biber]{biblatex}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 %\graphicspath{{figures/}}
@@ -104,25 +108,29 @@
             \begin{itemize}
               \item have no hardware dependencies
               \item control network latency configuration
-              \item be independent from algorithm implementation performance
+              \item be independent from compute speed/noise
             \end{itemize}
             You can view our codebase at: \href{https://github.com/QiroNT/comp3821}{https://github.com/QiroNT/comp3821}
           \end{column}
         \end{columns}
       \end{mytealbox}
       \begin{myorangebox}{Variables}
-        We tested the all combinations of the following:
+        We tested all combinations of the following:
         \begin{itemize}
           \item Algorithm: Bully, Raft, Paxos.
-          \item Network size: [TODO: add a list of network sizes tested]
-          \item Network latency profiles: uniform, geographic, random.
+          \item Network size: 17, 34, 68, 136, 204, 272, 408, 544, 816, 1088.
+          \item Network latency profiles: uniform, geographic, 95\%/5\%.
         \end{itemize}
         \begin{figure}
           \input{geographicExample.tex}
-          \caption{An example network with size 5 and a geographic latency profile. Nodes of different colours belong to different "regions".}
+          \caption{An example network with size 5 and a geographic latency profile. Nodes of different colours belong to different continents.}
         \end{figure}
       \end{myorangebox}
       \begin{mypinkbox}{Results}
+        \begin{figure}
+          \input{chart.tex}
+          \caption{Election time against network size under the geographic latency profile.}
+        \end{figure}
       \end{mypinkbox}
       \begin{mybox}{Conclusion}
         
