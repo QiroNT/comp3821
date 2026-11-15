@@ -19,6 +19,7 @@
 \usetikzlibrary{automata} % Import library for drawing automata
 \usepackage[style=alphabetic, backend=biber]{biblatex}
 \usepackage{pgfplots}
+\usepackage{wrapfig}
 \pgfplotsset{compat=1.18}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
@@ -51,6 +52,9 @@
   \begin{columns}[t]
     \begin{column}{.5\linewidth}
       \begin{mybox}{What are Leader Election Algorithms?}
+        \begin{wrapfigure}{r}{0.35\textwidth}
+          \includegraphics[width=0.35\textwidth]{images/summaryDiagram.png}
+        \end{wrapfigure}
         A set of algorithms utilised when a distributed system:
         \begin{enumerate}
           \item relies on single node to be a main database, coordinator, etc,
@@ -61,8 +65,7 @@
         evaluating these algorithms in realistic network configurations to find the fastest must be done when algorithms share a worst-case runtime.
       \end{mybox}
       \begin{mybluebox}{Bully Algorithm}
-        \textbf{Worst Case Time Complexity:} $O(n^2)$\\
-        \textbf{Key Features:}
+        \textbf{Worst Case Time Complexity:} $O(n^2)$
         \begin{itemize}
           \item A node requests nodes with a higher ID that it wants an election.
           \item Any response from a greater node makes a sender concede, this greater node holds a new election.
@@ -71,8 +74,7 @@
         \end{itemize}
       \end{mybluebox}
       \begin{mybluebox}{Paxos Algorithm}
-        \textbf{Worst Case Time Complexity:} $O(\infty)$\\
-        \textbf{Key Features:}
+        \textbf{Worst Case Time Complexity:} $O(\infty)$
         \begin{itemize}
           \item Features simultaneous proposer, accepter, and learner roles.
           \item Two election phases deciding who proposes and whether their value is accepted.
@@ -80,8 +82,7 @@
         \end{itemize}
       \end{mybluebox}
       \begin{mybluebox}{Raft Algorithm}
-        \textbf{Worst Case Time Complexity:} $O(n^2)$\\
-        \textbf{Key Features:}
+        \textbf{Worst Case Time Complexity:} $O(n^2)$
         \begin{itemize}
           \item Intended as a Paxos successor; all nodes begin as followers.
           \item Random exponential backoff and timeouts reduce collisions.
@@ -90,7 +91,9 @@
         \begin{figure}
             \centering
             \input{raftState.tex}
+            \vspace{-0.7em}
             \caption{A state diagram for the raft algorithm}
+            \vspace{-0.7em}
         \end{figure}
       \end{mybluebox}
       \begin{myredbox}{Consensus Algorithms can be Leader Elections!}

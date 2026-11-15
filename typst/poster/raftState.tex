@@ -10,5 +10,5 @@
     edge [loop above, looseness=4] node {times out} (c)
     edge [] node {gains majority} (l)
     edge [bend right, above] node {discovers leader} (f)
-    (l) edge [bend left] node {discovers higher term leader} (f);
+    (l) edge [bend left, looseness=0.8] node {discovers higher term leader} (f);
 \end{tikzpicture}
