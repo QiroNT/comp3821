@@ -33,10 +33,17 @@
   \begin{columns}[t]
     \begin{column}{.5\linewidth}
       \begin{mybox}{What are Leader Election Algorithms?}
-        In distributed computing, it is often useful to denote a single node to act as a coordinator of others, such as a primary database, or a distributor for tasks.
-        However, when this leader node crashes, it is crucial to find another node to lead in a timely fashion. Furthermore, this result must be agreed upon by all other nodes,
-        or else it could lead to inconsistent state across the system. Leader election algorithms aim to solve these problems by ensuring an agreed upon node is chosen as leader,
-        and that all nodes understand and accept this change.
+        A set of algorithms utilised when a distributed system:
+        \begin{enumerate}
+          \item relies on a primary node to act as main database, coordinator, etc.
+          \item and no primary node is established
+          \item or connection to the primary node is lost; either due to timeout or network splitting.
+        \end{enumerate}
+        \begin{figure}
+          %find a way to draw in latex in squished form
+          \includegraphics{images/summaryDiagram.png}
+          \caption{A single leader maintains consistency, but how can the network recover from the loss of it's leader?}
+        \end{figure}
       \end{mybox}
       \begin{mybluebox}{Bully Algorithm}
         \textbf{Worst Case Time Complexity:} $O(n^2)$\\
