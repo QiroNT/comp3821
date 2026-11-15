@@ -140,7 +140,7 @@
       \end{mypinkbox}
       \begin{mybox}{Conclusion}
         We have concluded that Paxos is the most efficient of the three algorithms when operating across a cross-continental profile.
-        While Raft occasionally performs faster, the random backoff introduces far greater variability and produces many outliters that
+        While Raft occasionally performs faster, the random backoff introduces far greater variability and produces many outliers that
         result in a far greater runtime.
         Furthermore, the exponential nature of the bully algorithm is apparent in its far greater growth factor. 
         Overall, we would suggest cross-continental distributed systems perfer Paxos when performing leader election.
