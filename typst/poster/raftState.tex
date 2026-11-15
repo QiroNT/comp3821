@@ -1,3 +1,4 @@
+\vspace{-2.5em}
 \begin{tikzpicture}[node distance=7cm,thick,auto, initial text={}, scale=1]
     % draw the states
     \node[state, initial, fill=unsw@green] (f) {Follower}; % note the semicolon
@@ -7,8 +8,9 @@
     \path[->] 
     (f) edge [below] node {times out} (c)
     (c) 
-    edge [loop above] node {times out} ()
+    edge [loop above, looseness=4] node {times out} (c)
     edge [] node {gains majority} (l)
     edge [bend right, above] node {discovers leader} (f)
     (l) edge [bend left] node {discovers higher term leader} (f);
 \end{tikzpicture}
+\vspace{-3em}
