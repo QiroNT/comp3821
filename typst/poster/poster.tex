@@ -41,15 +41,15 @@
       \begin{mybox}{What are Leader Election Algorithms?}
         A set of algorithms utilised when a distributed system:
         \begin{enumerate}
-          \item relies on a primary node to act as main database, coordinator, etc.,
-          \item and, no primary node is established,
-          \item or, connection to the primary node is lost; either due to timeout or network splitting.
+          \item relies on single node to be a main database, coordinator, etc,
+          \item has no primary node is established, and
+          \item when the primary node is offline due to timeouts or network split.
         \end{enumerate}
-        % \begin{figure}
-        %   %find a way to draw in latex in squished form
-        %   \includegraphics{images/summaryDiagram.png}
-        %   \caption{A single leader maintains consistency, but how can the network recover from the loss of it's leader?}
-        % \end{figure}
+        \begin{figure}
+          %find a way to draw in latex in squished form
+          \includegraphics{images/summaryDiagram.png}
+          \caption{One leader maintains consistency, but how can the network recover from the loss of its leader?}
+        \end{figure}
       \end{mybox}
       \begin{mybluebox}{Bully Algorithm}
         \textbf{Worst Case Time Complexity:} $O(n^2)$\\
@@ -65,9 +65,8 @@
         \textbf{Worst Case Time Complexity:} $O(\infty)$\\
         \textbf{Key Features:}
         \begin{itemize}
-          \item Features proposer, accepter, and learner roles.
-          \item All nodes can hold all roles at once.
-          \item Has two phases of election, one to decide who proposes some value, then another to get that value accepted.
+          \item Features simultaneous proposer, accepter, and learner roles.
+          \item Two election phases deciding who proposes and whether their value is accepted.
           \item Best case time complexity of $O(n)$.
         \end{itemize}
       \end{mybluebox}
@@ -77,8 +76,8 @@
         \begin{itemize}
           \item Intended as successor to Paxos.
           \item All nodes begin as followers.
-          \item Random exponential backoff is used along with timeouts to reduce collisions.
-          \item Candidates broadcast requestVote() to all nodes and immediately receive a majority for a best case time complexity $O(n)$.
+          \item Random exponential backoff and timeouts reduce collisions.
+          \item Candidates broadcast requestVote() to all nodes and receive results for a best case time complexity $O(n)$.
         \end{itemize}
         \begin{figure}
             \centering
@@ -89,12 +88,9 @@
     \end{column}
     \begin{column}{.5\linewidth}
       \begin{myredbox}{Consensus Algorithms can be Leader Elections!}
-        Technically, the Raft and Paxos algorithms are consensus algorithms, not leader election algorithms.
-        However without changing any correctness or performance: 
-        \begin{itemize}
-          \item Raft contains a distinct leader election phase which differs to the others.
-          \item Paxos can solve with the leader as the consensus value.
-        \end{itemize}
+        The Raft and Paxos algorithms are intended as consensus algorithms. However, with Raft we only the initial leader election phase,
+        and for Paxos, we choose the value being agreed upon to be about who is a "leader".
+        Thus we can slightly modify these algorithms to focus on leader elections without any correctness or performance changes.
       \end{myredbox}
       \begin{mytealbox}{Testing framework}
         \begin{columns}
