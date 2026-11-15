@@ -31,6 +31,17 @@
 \date{}
 \addbibresource{references.bib}
 
+% https://tex.stackexchange.com/a/195194
+\defbibenvironment{nolabel}
+  {\list
+     {}
+     {\setlength{\leftmargin}{\bibhang}%
+      \setlength{\itemindent}{-\leftmargin}%
+      \setlength{\itemsep}{\bibitemsep}%
+      \setlength{\parsep}{\bibparsep}}}
+  {\endlist}
+  {\item}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 % available: mytealbox, mybluebox, mypurplebox, myorangebox
 \begin{document}
@@ -136,7 +147,7 @@
       \end{mybox}
       \begin{mybox}{References}
         \nocite{*}
-        \printbibliography
+        \printbibliography[env=nolabel]
       \end{mybox}
     \end{column}
   \end{columns}
