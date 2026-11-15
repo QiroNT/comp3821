@@ -1,7 +1,7 @@
 % compile with XeLaTex or LuaLaTeX (this is due to selection of specific fonts)
 % on overleaf: Menu > Settings > Compiler
 
-\documentclass[final,hyperref={pdfpagelabels=false}]{beamer}
+\documentclass[final,hyperref={pdfpagelabels=false, colorlinks=true, urlcolor=unsw@blue}]{beamer}
 \usepackage{tangocolors}
 \mode<presentation>
 {
@@ -88,9 +88,22 @@
         Thus we can slightly modify these algorithms to focus on leader elections without any correctness or performance change to the algorithms themselves.
       \end{myredbox}
       \begin{mytealbox}{Testing framework}
-        We implemented a testing framework so that our experiment could be indpendent of hardware.
-        It provides an API for separate implementations of our algorithms to work on exactly the same network configuration and same communication overhead.
-        This also allows us to construct specific network latency profiles and standardise running times to standard theoretical networks instead of CPU cycle speed.
+        \begin{columns}
+          \begin{column}{.25\linewidth}
+            \begin{figure}
+              \includegraphics[width=\linewidth]{images/repoQR.png}
+            \end{figure}
+          \end{column}
+          \begin{column}{0.75\linewidth}
+            We implemented a testing framework with its own global clock so that our experiment could:
+            \begin{itemize}
+              \item have no hardware dependencies
+              \item control network latency configuration
+              \item be independent from algorithm implementation performance
+            \end{itemize}
+            You can view our codebase at: \href{https://github.com/QiroNT/comp3821}{https://github.com/QiroNT/comp3821}
+          \end{column}
+        \end{columns}
       \end{mytealbox}
       \begin{myorangebox}{Variables}
         We tested the all combinations of the following:
