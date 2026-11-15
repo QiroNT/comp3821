@@ -161,9 +161,10 @@ vite.config.ts.timestamp-*
 *.nav
 *.out
 *.snm
-*.synctex.gz
-*.synctex.gz(busy)
+*.synctex*
 *.toc
+*.fls
+*.fdb_latexmk
 
 ## Bibliography auxiliary files (bibtex/biblatex/biber):
 *.bbl

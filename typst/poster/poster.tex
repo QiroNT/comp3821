@@ -1,5 +1,5 @@
-% !TEX program = lualatex
-% !TEX options = -shell-escape -synctex=1 -interaction=nonstopmode -file-line-error "%DOC%"
+% !TEX program = latexmk
+% !TEX options = -lualatex -shell-escape -synctex=1 -interaction=nonstopmode -file-line-error "%DOC%"
 % compile with XeLaTex or LuaLaTeX (this is due to selection of specific fonts)
 % on overleaf: Menu > Settings > Compiler
 
@@ -135,6 +135,7 @@
         Overall, we would suggest cross-continental distributed systems perfer Paxos when performing leader election.
       \end{mybox}
       \begin{mybox}{References}
+        \nocite{*}
         \printbibliography
       \end{mybox}
     \end{column}
