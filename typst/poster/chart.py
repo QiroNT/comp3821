@@ -21,22 +21,10 @@ def get_runs(db, dataset):
     return runs
 
 
-def points_filter(times):
-    """Exclude outliers by IQR rule."""
-    q1, _, q3 = statistics.quantiles(times, n=4, method="inclusive")
-    irq = q3 - q1
-    low = q1 - 1.5 * irq
-    high = q3 + 1.5 * irq
-
-    return [t for t in times if low <= t <= high]
-
-
 def plot_points(times, nodes, jitter_width):
     """Plot raw point."""
-    filtered = points_filter(times)
-
     points = []
-    for i, time in enumerate(filtered):
+    for i, time in enumerate(times):
         fraction = (i * GOLDEN) % 1
         x = nodes * math.exp((fraction * 2 - 1) * jitter_width)
         points.append(f"({x:.4f},{time:.4f})")
