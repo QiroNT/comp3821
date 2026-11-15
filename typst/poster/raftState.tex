@@ -1,4 +1,3 @@
-\vspace{-2.5em}
 \begin{tikzpicture}[node distance=7cm,thick,auto, initial text={}, scale=1]
     % draw the states
     \node[state, initial, fill=unsw@green] (f) {Follower}; % note the semicolon
@@ -13,4 +12,3 @@
     edge [bend right, above] node {discovers leader} (f)
     (l) edge [bend left] node {discovers higher term leader} (f);
 \end{tikzpicture}
-\vspace{-3em}
