@@ -95,7 +95,7 @@ async function iter(dataset: string, regions: RegionName[]) {
 
     const pool = new Tinypool({
       filename: new URL('../cloudping/worker.ts', import.meta.url),
-      maxThreads: Math.floor(Math.min(limiter / (r.length ** 2), 1) * cpuCount),
+      maxThreads: Math.ceil(Math.min(limiter / (r.length ** 2), 1) * cpuCount),
     })
 
     for (const name of Object.keys(algorithms))
