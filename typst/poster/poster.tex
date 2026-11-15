@@ -45,11 +45,11 @@
           \item has no primary node is established, and
           \item when the primary node is offline due to timeouts or network split.
         \end{enumerate}
-        \begin{figure}
-          %find a way to draw in latex in squished form
-          \includegraphics{images/summaryDiagram.png}
-          \caption{One leader maintains consistency, but how can the network recover from the loss of its leader?}
-        \end{figure}
+        % \begin{figure}
+        %   %find a way to draw in latex in squished form
+        %   % \includegraphics{images/summaryDiagram.png}
+        %   % \caption{One leader maintains consistency, but how can the network recover from the loss of its leader?}
+        % \end{figure}
       \end{mybox}
       \begin{mybluebox}{Bully Algorithm}
         \textbf{Worst Case Time Complexity:} $O(n^2)$\\
@@ -74,8 +74,7 @@
         \textbf{Worst Case Time Complexity:} $O(n^2)$\\
         \textbf{Key Features:}
         \begin{itemize}
-          \item Intended as successor to Paxos.
-          \item All nodes begin as followers.
+          \item Intended as a Paxos successor; all nodes begin as followers.
           \item Random exponential backoff and timeouts reduce collisions.
           \item Candidates broadcast requestVote() to all nodes and receive results for a best case time complexity $O(n)$.
         \end{itemize}
@@ -85,13 +84,13 @@
             \caption{A state diagram for the raft algorithm}
         \end{figure}
       \end{mybluebox}
-    \end{column}
-    \begin{column}{.5\linewidth}
       \begin{myredbox}{Consensus Algorithms can be Leader Elections!}
         The Raft and Paxos algorithms are intended as consensus algorithms. However, with Raft we only the initial leader election phase,
         and for Paxos, we choose the value being agreed upon to be about who is a "leader".
         Thus we can slightly modify these algorithms to focus on leader elections without any correctness or performance changes.
       \end{myredbox}
+    \end{column}
+    \begin{column}{.5\linewidth}
       \begin{mytealbox}{Testing framework}
         \begin{columns}
           \begin{column}{.25\linewidth}
