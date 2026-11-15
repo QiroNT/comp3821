@@ -57,8 +57,8 @@
           \item has no primary node is established, and
           \item when the primary node is offline due to timeouts or network split.
         \end{enumerate}
-        As distributed systems such as Apache Zookeeper, Kubernetes and MongoDB implemented paradigms that depend on a leader,
-        evaluating leader election algorithms in discrete network configurations must be done when many algorithms have the worst case time complexity.
+        Distributed systems such as Apache Zookeeper, Kubernetes, and MongoDB implement paradigms that depend on a leader, so
+        evaluating these algorithms in realistic network configurations to find the fastest must be done when algorithms share a worst-case runtime.
       \end{mybox}
       \begin{mybluebox}{Bully Algorithm}
         \textbf{Worst Case Time Complexity:} $O(n^2)$\\
