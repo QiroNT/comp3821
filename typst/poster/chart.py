@@ -45,16 +45,13 @@ def plot_points(times, nodes, jitter_width):
 
 
 def plot_summary(times, nodes):
-    """Plot mean and stdev."""
-    logs = [math.log(t) for t in times]
+    """Plot median and interquartile range."""
+    q1, median, q3 = statistics.quantiles(times, n=4, method="inclusive")
 
-    mean = math.exp(statistics.fmean(logs))
-    stdev = math.exp(statistics.stdev(logs))
+    upper_error = q3 - median
+    lower_error = median - q1
 
-    upper_error = mean * stdev - mean
-    lower_error = mean - mean / stdev
-
-    return f"({nodes},{mean:.4f}) += (0,{upper_error:.4f}) -= (0,{lower_error:.4f})"
+    return f"({nodes},{median:.4f}) += (0,{upper_error:.4f}) -= (0,{lower_error:.4f})"
 
 
 def addplot(series, name, points):
