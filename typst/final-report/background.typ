@@ -74,7 +74,9 @@ Raft also restricts votes to candidates whose logs are at least as up to date as
 
 == Paxos
 
-Paxos @lamport-part-time @lamport-paxos-simple reaches agreement on a single value.
+Paxos 
+//@lamport-part-time @lamport-paxos-simple 
+reaches agreement on a single value.
 Nodes play three roles: *proposers* suggest values, *acceptors* vote on them, and *learners* find out the outcome.
 Each proposal has a unique, increasing proposal number.
 
@@ -88,7 +90,7 @@ The rule in step 2 is what preserves this: any majority that promises to a later
 *Liveness.*
 Paxos never chooses two values, but it is not guaranteed to finish.
 Two proposers can repeatedly issue higher numbers and cancel each other's `Prepare` phase indefinitely.
-#pc[@lamport-paxos-simple] notes that a reliable way to pick a single proposer must use randomness or real time, for example timeouts.
+#pc[@leslie-paxos] notes that a reliable way to pick a single proposer must use randomness or real time, for example timeouts.
 For us this means Paxos election time should depend heavily on how proposers' timeouts are spread out, as with Raft.
 
 *Predicted cost.*

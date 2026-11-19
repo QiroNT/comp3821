@@ -1,9 +1,11 @@
 #import "./lib/template.typ": template, title-line
 #import "./final-report/config.typ": *
 
+#include "final-report/coverpage.typ"
+
 #let title = [Evaluating Leader Election Algorithms]
 #show: template.with(title: title, enum-numbering: "1.")
-#title-line(title)
+//#title-line(title)
 
 #include "./final-report/background.typ"
 #include "./final-report/code.typ"
