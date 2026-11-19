@@ -1,5 +1,6 @@
 = Method
 We tested 3 algorithms with varied network sizes and various network latency profiles.
+Specifically, we tested all possible combinations of algorithms (Bully, Paxos, Raft), network sizes (20, TODO: the actual discrete sizes) and latency profiles (TODO: the actual discrete profiles).
 
 === Latency Profiles
 "Network latency profiles" describe the distribution and (non-statistical) variance of the latency between links in a network.
