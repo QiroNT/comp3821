@@ -1,5 +1,5 @@
 #let title-page(title: [], people: [], fill: yellow, body) = {
-  set page(fill: rgb("#fffac2"), margin: (top: 1.5in, rest: 2in))
+  set page(fill: rgb("#d3e8fb"), margin: (top: 1.5in, rest: 2in))
   set text(font: "New Computer Modern Math", size: 14pt)
   set heading(numbering: "1.1.1")
   line(start: (0%, 0%), end: (8.5in, 0%), stroke: (thickness: 2pt))

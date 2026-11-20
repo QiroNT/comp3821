@@ -11,4 +11,13 @@ For example, between Australia and South Korea, there might be a couple hundred 
 Thus these profiles help evaluate the real-world effectiveness of algorithms on distributed systems.
 Finally, TODO: explain 95%/5% latency.
 
-*TODO:* write a proper procedure
+=== Procedure
+We automated the following steps using Python3:
++ Set the algorithm code for the simulation to be the Bully algorithm
++ Build a connected network of size 20
++ Set each edge to have the same latency
++ Start the simulation and record the finishing time fro the logs
++ Repeat the above 5 move times
++ Repeat the above for all other latency profiles
++ Repeat the above for all other network sizes [TODO: write the actual discrete size]
++ Repeat the above for the Paxos and Raft algorithms
