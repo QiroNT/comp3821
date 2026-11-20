@@ -14,10 +14,15 @@ Finally, we tested on a 95%/5% split of fast and slow links, with the slow links
 === Randomness
 Many of the algorithms and experiment rely on randomisation.
 For example, the random backoff for the Raft algorithm as well as the random distribution of latencies across a network.
-To ensure that randomness doesn't skew our results we did hundreds of samples to standardise our distribution.
+To ensure that randomness did't skew the results, hundreds of samples were done to standardise our distribution.
+
+=== Timing
+The testing framework provides a system of discrete time steps based on the latency of network links.
+This meant that results were not affected by any variance in the optimisation of algorithm implementation, compute speed of physical hardware and the transmission delays caused by pushing data onto a link.
+For in-depth analysis, the framework provided logs for each message sent.
 
 === Procedure
-We automated the following steps using Python3:
+The following steps were automated using Python3:
 + Set the algorithm code for the simulation to be the Bully algorithm
 + Build a connected network of size 20
 + Set each edge to have the same latency
@@ -25,4 +30,4 @@ We automated the following steps using Python3:
 + Repeat the above 5 move times
 + Repeat the above for all other latency profiles
 + Repeat the above for all other network sizes [TODO: write the actual discrete size]
-+ Repeat the above for the Paxos and Raft algorithms
++ Repeat the above for the Paxos and Raft algorithm

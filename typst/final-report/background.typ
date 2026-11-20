@@ -3,13 +3,20 @@
 = Background
 
 This section introduces the three algorithms we compare, the assumptions each one makes about the network, and what theory predicts about their behaviour in our experiments.
+First, however, comes motivation for study these algorithms.
+
+== Value of Leader Election Algorithms
+//TODO: motivate why we need leader elections and why we want them fast.
+// distributive systems
+// gaming model
 
 == Leader Election, Consensus and Timing Models
 
 Bully and Raft were designed for different problems.
 Bully is a *leader election* algorithm: it chooses a coordinator, but does not on its own guarantee that two nodes never act as coordinator at the same time.
 Raft and Paxos are *consensus* algorithms: a set of nodes agree on a single value (Paxos) or a sequence of values (Raft), and once a value is chosen it never changes.
-Leader election can be expressed as consensus on the value "the identifier of the leader", which is how we use Raft and Paxos in this project.
+Leader election can be expressed as consensus on the value "the identifier of the leader", which is how we use Raft and Paxos in this project. 
+In later sections we outline the specific implementation methods that achieve election of a leader using the consensus algorithms.
 
 The algorithms also differ in what they assume about message timing.
 In a *synchronous* system, every message arrives within a known bound, so a missing reply reliably means the other node has crashed.
@@ -49,7 +56,7 @@ We therefore expect Bully to be the fastest algorithm when latency is low and pr
 Raft @ongaro-raft divides time into numbered *terms*, each beginning with an election.
 Every node starts as a follower.
 If a follower hears nothing from a leader within its *election timeout*, it becomes a candidate, increments its term, votes for itself and requests votes from all other nodes.
-Each node grants at most one vote per term, and a candidate that receives votes from a majority becomes leader and immediately sends heartbeats (`AppendEntries`).
+Each node grants at most one vote per term, and a candidate that receives votes from a majority becomes leader and immediately sends heartbeats (`AppendEntries()`).
 
 *Why there is at most one leader per term.*
 Any two majorities of the same set of nodes must share at least one node, and that node votes only once per term.
