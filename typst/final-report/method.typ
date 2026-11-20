@@ -9,7 +9,12 @@ Uniform network latency was simulated by setting the same latency for all links 
 The geographic network latency profile mimics latency profiles that exist in the real world. 
 For example, between Australia and South Korea, there might be a couple hundred milliseconds of delay whilst within Australia itself, network latencies may only be tens of milliseconds.
 Thus these profiles help evaluate the real-world effectiveness of algorithms on distributed systems.
-Finally, TODO: explain 95%/5% latency.
+Finally, we tested on a 95%/5% split of fast and slow links, with the slow links being 100 times slower than the fast ones. These varied speeds were then randomly distributed across the network.
+
+=== Randomness
+Many of the algorithms and experiment rely on randomisation.
+For example, the random backoff for the Raft algorithm as well as the random distribution of latencies across a network.
+To ensure that randomness doesn't skew our results we did hundreds of samples to standardise our distribution.
 
 === Procedure
 We automated the following steps using Python3:
