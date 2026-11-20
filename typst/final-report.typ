@@ -19,9 +19,13 @@
   #include "./final-report/demos.typ"
 ]
 
+#pagebreak()
 #show bibliography: it => if show_references { it } else { place(hide(it)) }
 #bibliography(
   ("./final-report/refs.yml", "./final-report/refs.bib"),
   title: "References",
   style: "./lib/harvard-the-university-of-new-south-wales.csl",
 )
+
+#pagebreak()
+#include "final-report/appendix.typ"

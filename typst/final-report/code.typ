@@ -54,9 +54,9 @@ The rest of the parameters are the parameters passed in `node.call()`.
 
 == Bully
 
-The Bully algorithm presented by #pc[@garcia-bully] is transcribed as follows.
+//TODO: add a link for the appendix
+The Bully algorithm presented by #pc[@garcia-bully] is transcribed in the Appendix.
 
-#presentCode("../../packages/bully/src/index.ts")
 
 == Raft
 
