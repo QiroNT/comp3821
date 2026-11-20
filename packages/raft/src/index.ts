@@ -4,6 +4,7 @@ import parallel from 'it-parallel'
 
 /* eslint prefer-arrow-callback: "off", ts/no-use-before-define: "off" */
 
+// algorithm start
 // The node's expected properties/attributes:
 /*
 raftNode = {
@@ -23,8 +24,6 @@ enum RaftState {
   CANDIDATE,
   LEADER,
 }
-
-// algorithm begin
 
 // reset timeout
 const resetTimeout = fn(function resetTimeout(delay?: number) {

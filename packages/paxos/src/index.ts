@@ -2,6 +2,7 @@
 import type { Algorithm } from '@leader-eval/framework'
 import { fn, rpc } from '@leader-eval/framework'
 
+// algorithm start
 let globalProposalNumber = 0
 
 class Proposer {
@@ -123,6 +124,8 @@ const onStart = fn(async function onStart() {
   // the node will now wait to timeout.
   this.setTimeout(onTimeout, 0)
 })
+
+// algorithm end
 
 export const paxos: Algorithm = {
   rpcs: [],
