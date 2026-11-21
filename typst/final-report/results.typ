@@ -207,3 +207,65 @@ After that interval, it performs better on average and experiences as decrease i
   chart("single", mean-sql),
   caption: [Mean election time against network size under the uniform latency profile.],
 ) <fig:avg-single>
+
+== Tables
+
+#let data-table(dataset, summary-sql) = {
+  let summary = query(summary-sql(dataset))
+
+  let algorithms = summary.map(r => r.at(0)).dedup()
+  let sizes = summary.map(r => r.at(1)).dedup()
+
+  table(
+    columns: (auto,) + (1fr,) * sizes.len(),
+    align: (left,) + (right,) * sizes.len(),
+    table.header([], ..sizes.map(s => [*#s*])),
+    ..algorithms
+      .map(a => {
+        let l = [*#(upper(a.first()) + a.slice(1))*]
+        let rows = summary.filter(r => r.at(0) == a)
+        (l, ..rows.map(r => str(calc.round(r.at(2)))))
+      })
+      .flatten(),
+  )
+}
+
+#figure(
+  data-table("default", median-sql),
+  caption: [Median election time against network size under the geographic latency profile.],
+) <table:p50-default>
+
+#figure(
+  data-table("all", median-sql),
+  caption: [Median election time against network size under the sparse geographic latency profile.],
+) <table:p50-all>
+
+#figure(
+  data-table("skewed", median-sql),
+  caption: [Median election time against network size under the 95%/5% latency profile.],
+) <table:p50-skewed>
+
+#figure(
+  data-table("single", median-sql),
+  caption: [Median election time against network size under the uniform latency profile.],
+) <table:p50-single>
+
+#figure(
+  data-table("default", mean-sql),
+  caption: [Mean election time against network size under the geographic latency profile.],
+) <table:avg-default>
+
+#figure(
+  data-table("all", mean-sql),
+  caption: [Mean election time against network size under the sparse geographic latency profile.],
+) <table:avg-all>
+
+#figure(
+  data-table("skewed", mean-sql),
+  caption: [Mean election time against network size under the 95%/5% latency profile.],
+) <table:avg-skewed>
+
+#figure(
+  data-table("single", mean-sql),
+  caption: [Mean election time against network size under the uniform latency profile.],
+) <table:avg-single>
