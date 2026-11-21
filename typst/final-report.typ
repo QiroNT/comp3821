@@ -19,6 +19,7 @@
 #set heading(numbering: "1.1")
 //#title-line(title)
 
+#include "./final-report/introduction.typ"
 #include "./final-report/background.typ"
 #include "./final-report/code.typ"
 #include "./final-report/method.typ"

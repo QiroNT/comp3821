@@ -1,14 +1,8 @@
 #import "../lib/template.typ": pc
 
-= Background
+= Background <background>
 
 This section introduces the three algorithms we compare, the assumptions each one makes about the network, and what theory predicts about their behaviour in our experiments.
-First, however, comes motivation for study these algorithms.
-
-== Value of Leader Election Algorithms
-//TODO: motivate why we need leader elections and why we want them fast.
-// distributive systems
-// gaming model
 
 == Leader Election, Consensus and Timing Models
 
@@ -121,19 +115,3 @@ With competing proposers, we expect much higher variance and occasional runs tha
   ),
   caption: [Summary of the three algorithms for $n$ fully connected nodes with one-way latency $d$.],
 ) <tab-comparison>
-
-== Communication Model
-
-Leader election is often studied in networks where nodes can only message their neighbours, which suits algorithms designed for rings or general graphs.
-All three algorithms we compare instead assume that any node can message any other directly, and our simulator reflects this: calling a non-neighbouring node raises an error.
-Network topology in our experiments is therefore modelled as
-*TODO (group to confirm):* non-uniform latency between pairs of nodes, or multi-hop message routing.
-
-== Predictions
-
-The analysis above gives the following hypotheses, which our experiments test.
-
-+ With low, uniform latency and well-chosen timeouts, Bully settles fastest, close to $6d$, but sends the most messages.
-+ When the reply timeout is below the true latency, Bully elects multiple leaders, while Raft and Paxos slow down but never do.
-+ Raft and Paxos election times are dominated by the timeout distribution, and narrower timeout ranges increase split votes and duelling proposers.
-+ Variable latency increases the variance of Raft and Paxos election times more than their mean.

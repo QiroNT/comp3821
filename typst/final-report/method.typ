@@ -11,6 +11,9 @@ For example, between Australia and South Korea, there might be a couple hundred 
 Thus these profiles help evaluate the real-world effectiveness of algorithms on distributed systems.
 Finally, we tested on a 95%/5% split of fast and slow links, with the slow links being 100 times slower than the fast ones. These varied speeds were then randomly distributed across the network.
 
+For all profiles and networks, a symmetric bi-directional link latency was assumed. 
+This means that for any link between two nodes, A and B, the latency from A to B would be the same as the latency from B to A.
+
 === Randomness
 Many of the algorithms and experiment rely on randomisation.
 For example, the random backoff for the Raft algorithm as well as the random distribution of latencies across a network.
@@ -26,7 +29,7 @@ The following steps were automated using Python3:
 + Set the algorithm code for the simulation to be the Bully algorithm
 + Build a connected network of size 20
 + Set each edge to have the same latency
-+ Start the simulation and record the finishing time fro the logs
++ Start the simulation and record the finishing time for the logs
 + Repeat the above 5 move times
 + Repeat the above for all other latency profiles
 + Repeat the above for all other network sizes [TODO: write the actual discrete size]
