@@ -1,4 +1,5 @@
 = Conclusion
+// TODO: WRITE AN ACTUAL CONCULSION!!!
 Under a simulated network with discrete time intervals and reliable channels, Paxos is the fastest algorithm.
 Both Paxos and Raft show an empirical linear time complexity with Raft having a lightly larger overhead. 
 If we were to make a game that implemented a leader election algorithm for multi-user connection, we would choose the Raft algorithm as it is simpler to implement and is bounded in worst-case time complexity.
