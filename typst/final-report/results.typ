@@ -200,7 +200,7 @@ Both the Raft and Paxos algorithms have higher variance in election time between
   caption: [Mean election time against network size under the 95%/5% latency profile.],
 ) <fig:avg-skewed>
 
-The average election time for the Paxos algorithm is highest under a uniform latency profile (@figure:avg-single).
+The average election time for the Paxos algorithm is highest under a uniform latency profile (@fig:avg-single).
 Following that, the Raft algorithm peforms worse than the Bully algorithm for networks sizes between $40$ to $480$.
 After that interval, it performs better on average and experiences as decrease in average election time.
 #figure(
