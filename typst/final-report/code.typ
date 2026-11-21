@@ -58,6 +58,12 @@ The rest of the parameters are the parameters passed in `node.call()`.
 *Appendix Entry: @bully-appendix*
 
 The Bully algorithm presented by #pc[@garcia-bully] was translated in JavaScript almost line for line.
+TODO: Rewrite
+, and our RPCs use the paper's procedure names (`AreYouThere`, `Halt`, `NewCoordinator`, `Ready`).
+Each node has a unique priority (its identifier).
+A node starting an election first asks every higher-priority node whether it is alive.
+If any replies, it defers to it; otherwise it halts every lower-priority node, announces itself as the new coordinator, and distributes the new state with `Ready`.
+The live node with the highest identifier therefore always wins.
 
 == Paxos
 *Appendix Entry: @paxos-appendix*
@@ -65,6 +71,10 @@ The Bully algorithm presented by #pc[@garcia-bully] was translated in JavaScript
 // TODO: add details about Paxos implementation
 We have adapted the plain English and pseudocode described by #pc[@roohitavaf-paxos] for our concrete implementations.
 Additionally, while Paxos is not specifically designed for leader election, as a consensus algorithm, it can be modified to come to a consensus for a leader.
+TODO: Rewrite
++ *Prepare / Promise.* A proposer sends `Prepare(n)` to the acceptors. An acceptor that has not promised a higher number promises to ignore proposals numbered below $n$, and replies with the highest-numbered proposal it has already accepted, if any.
++ *Accept / Accepted.* Once a majority has promised, the proposer sends `Accept(n, v)`. Here $v$ must be the value of the highest-numbered proposal reported in the promises, and the proposer may use its own value only if none was reported. An acceptor accepts unless it has since promised a higher number.
+
 
 == Raft
 *Appendix Entry: @raft-appendix*
