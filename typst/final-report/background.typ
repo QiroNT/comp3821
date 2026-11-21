@@ -6,44 +6,43 @@ This section introduces the three algorithms we compare, the assumptions each on
 
 == Leader Election, Consensus and Timing Models
 
-Bully and Raft were designed for different problems.
-Bully is a *leader election* algorithm: it chooses a coordinator, but does not on its own guarantee that two nodes never act as coordinator at the same time.
-Raft and Paxos are *consensus* algorithms: a set of nodes agree on a single value (Paxos) or a sequence of values (Raft), and once a value is chosen it never changes.
-Leader election can be expressed as consensus on the value "the identifier of the leader", which is how we use Raft and Paxos in this project. 
-In later sections we outline the specific implementation methods that achieve election of a leader using the consensus algorithms.
+Leader Election algorithsm aim to solve the problem in distributed computing of deciding which node should act as a coordinator for others.
+There are 3 main requirements that an algorithm must fulfil to validly elect a leader #pc[@leader-election-requirements].
+These are uniqueness, that only one healthy process considered leader, agreement, that all nodes agree that node is leader, and scale, essentially that the algorithm terminates. 
 
-The algorithms also differ in what they assume about message timing.
-In a *synchronous* system, every message arrives within a known bound, so a missing reply reliably means the other node has crashed.
-In an *asynchronous* system, there is no such bound, so a slow node cannot be distinguished from a crashed one.
-#pc[@flp-impossibility] proved that no deterministic algorithm can guarantee consensus in an asynchronous system if even one node may crash.
-Practical algorithms respond to this result in one of two ways.
-Bully assumes synchrony, so it is fast but can produce incorrect results when the assumption fails.
-Raft and Paxos never violate safety (agreement) under asynchrony, and only rely on the network being "eventually" well-behaved to make progress, a model called *partial synchrony* @dls-partial-synchrony.
+The Bully, Raft, and Paxos algorithms were each designed to solve different problems.
+Bully was designed as a leader election algorithm, whereas Paxos and Raft were designed as consensus algorithms, a more general set of algorithms where rather than selecting a node as leader, one or more values are selected to be shared across and agreed upon by each node.
+We modify Raft and Paxos such that the value upon consensus is reaches is the identifier of a to-be leader node, allowing no functional modification to both while maintaining correctness under the same assumptions. 
+In later sections we outline the specific implementation decisions made that convert each consensus algorithm to leader election.
+
+The algorithms also differ in what their assumptions about timing across the network. We define the terms we use to describe each assumptions as follows:
+- **Synchronous**: Every network message will arrive within a known bound of time, allowing a missing or timed-out reply to guarantee that recipient node has crashed.
+- **Asynchronous**: Conversely, that there is no such bound, so a slow node cannot be distinguished from a crashed one.
+#pc[@flp-impossibility] proved that no deterministic algorithm can guarantee consensus in an asynchronous system if even one node crashes.
+
+**TODO**: This sentence isn't done.
+While Raft and Paxos never violate agreement in asynchronous systems and only rely on the network eventually responding well-behaved to make progress toward consensus, a model called *partial synchrony* @dls-partial-synchrony.
+**TODO**: Also we need to explain what impact this has
 This difference shapes what "speed" means for each algorithm, and is why we expect them to respond differently to high or variable latency.
 
 == Bully
 
-Our implementation follows the procedures given by #pc[@garcia-bully], and our RPCs use the paper's procedure names (`AreYouThere`, `Halt`, `NewCoordinator`, `Ready`).
-Each node has a unique priority (its identifier).
-A node starting an election first asks every higher-priority node whether it is alive.
-If any replies, it defers to it; otherwise it halts every lower-priority node, announces itself as the new coordinator, and distributes the new state with `Ready`.
-The live node with the highest identifier therefore always wins.
+The Bully Algorithm as described by #pc[@garcia-bully] aims to ensure the node with the highest ID in the system becomes the new leader of the distributed system.
+Simply, the first node to notice the a heartbeat request to the leader times out, indicating the leader has gone down, initiates an election by calling out to every node with a higher ID than itself.
+If any of these requests get a response, it means that the instigator node does not have the highest ID, and should concede the election to any of the higher ID nodes.
+For each healthy high ID node that is notified that a lower ID node is trying to become leader, the higher ID node will respond, and then start its own election through an identical process.
+Once a node receives no responses, it means it has the highest ID in the pool, and then sends out a notification to all other nodes that it is now the leader.
 
-The paper assumes that nodes fail only by crashing, that messages are not lost, and that a node that does not reply within a time limit has failed.
-These are synchronous assumptions.
+The paper, and hence our experimentation for Bully, makes the relevant assumptions that a node failure occurs via a crash, that the network never drops a message, a timeout on a message indicates a node as failed, and all healthy nodes respond to requests immediately.
+Most crucially, Bully assumes the network is synchronous so the impossibility condition never arises and Bully always runs correctly.
+Under these assumptions Bully is known to satisfy the requirements of a leader election algorithm.
 
-*Predicted cost.*
-Consider $n$ fully connected nodes with uniform one-way latency $d$, where every node begins an election at once, as in our simulator's start-up.
-The highest node needs three request--reply round trips (`Halt`, `NewCoordinator`, `Ready`), so the leader should settle after $6d$.
-Every node sends `AreYouThere` to each higher node, giving $n(n-1)\/2$ requests, plus $3(n-1)$ requests from the winner, each with a reply.
+**TODO**: Clean this up, I'm not really sure about the maths, it seems slightly suspect especially the conclusion (now removed, we never expected bully to be fastest)
+*Simple Predicted Runtime.* We will consider a fully connected network containing $n$ nodes where all connections have fixed latency $d$.
+If every node begins an election at once to match our simulator, the highest ID node will use three round-trip requests (`Halt`, `NewCoordinator`, `Ready`) causing the leader to settle after $6d$.
+Furthermore, every node sends `AreYouThere` to all higher ID nodes, generating $n(n-1)\/2$ requests, plus an additional $3(n-1)$ requests from the winner, each with a reply.
 The message count is therefore $Theta(n^2)$.
 Our test with $n = 5$ and $d = 1$ matches both predictions: the leader settles at time $6.0$ after $10 + 12 = 22$ requests.
-
-*Failure of the timing assumption.*
-One of our Bully tests sets the latency ($100$) far above the reply timeout ($1$), so every reply is treated as a crash.
-In the log, node $0$ and node $4$ both declare themselves leader, and the simulation never settles.
-This is a "split brain": the algorithm's correctness depends on the timeout being longer than the true message delay.
-We therefore expect Bully to be the fastest algorithm when latency is low and predictable, and to fail outright, rather than merely slow down, when the timeout is set too aggressively for the network.
 
 == Raft
 
@@ -63,6 +62,7 @@ If several followers time out at nearly the same moment, the votes split, nobody
 Raft makes this unlikely by choosing each timeout at random, and the paper's experiments show that even a small range of randomness greatly reduces split votes; the authors suggest $150$--$300$ ms.
 Raft also requires the time to broadcast a message to be much smaller than the election timeout.
 
+**TODO:** Review
 *Predicted cost.*
 If timeouts are drawn uniformly from $[a, b]$, the first of $n$ nodes times out after an expected $a + (b - a)\/(n + 1)$.
 Without a split vote, the candidate then needs one round trip to collect votes and one more message for followers to learn the leader, so the election should settle after roughly $a + (b-a)\/(n+1) + 3d$, using $O(n)$ messages.
@@ -75,25 +75,24 @@ Raft also restricts votes to candidates whose logs are at least as up to date as
 
 == Paxos
 
-Paxos 
+2. Assumptions about it, particularly about the liveliness property
+Paxos is a consensus algorithm that ensures all nodes in a system decide and agree on a singe value #pc[@leslie-paxos].
+Each node in the system holds any of the following three roles at once:
+1. Proposer, where the node tries to become a temporary leader, then proposes a value.
+2. Acceptor, where the node votes on proposers, and then their value.
+3. Learner, where the node learns the outcome of the election and commits it. 
 //@lamport-part-time @lamport-paxos-simple 
-reaches agreement on a single value.
-Nodes play three roles: *proposers* suggest values, *acceptors* vote on them, and *learners* find out the outcome.
-Each proposal has a unique, increasing proposal number.
-
-+ *Prepare / Promise.* A proposer sends `Prepare(n)` to the acceptors. An acceptor that has not promised a higher number promises to ignore proposals numbered below $n$, and replies with the highest-numbered proposal it has already accepted, if any.
-+ *Accept / Accepted.* Once a majority has promised, the proposer sends `Accept(n, v)`. Here $v$ must be the value of the highest-numbered proposal reported in the promises, and the proposer may use its own value only if none was reported. An acceptor accepts unless it has since promised a higher number.
-
-A value is chosen once a majority of acceptors accept it.
-The key invariant is that once a value $v$ is chosen, every higher-numbered proposal also carries $v$.
-The rule in step 2 is what preserves this: any majority that promises to a later proposal overlaps the majority that accepted $v$, so the later proposer learns $v$ and must adopt it.
+Each proposal has a unique, monotonically increasing proposal number.
+Once a majority of acceptors promise to follow a proposer, that proposer then is allowed to propose its value.
+After that, the acceptors then vote to accept the value, and once a majority is reached, the proposer sends out the value and all nodes become learners of that value.
 
 *Liveness.*
-Paxos never chooses two values, but it is not guaranteed to finish.
-Two proposers can repeatedly issue higher numbers and cancel each other's `Prepare` phase indefinitely.
-#pc[@leslie-paxos] notes that a reliable way to pick a single proposer must use randomness or real time, for example timeouts.
-For us this means Paxos election time should depend heavily on how proposers' timeouts are spread out, as with Raft.
+Paxos is not guaranteed to complete as two proposers can repeatedly issue proposals of greater value and cancel the other indefinitely.
+#pc[@leslie-paxos] notes that to reliably pick a single proposer, an implementation must use randomness, such as exponential backoffs, or real time.
+Since we assume the partial synchrony model, we guarantee that Paxos will always produce a result.
+However, the runtime should depend heavily on how proposers' timeouts are spread out, as with Raft.
 
+**TODO:** As before
 *Predicted cost.*
 With a single proposer, the election takes two round trips plus one message to inform learners, roughly $T + 5d$ after the first timeout $T$, using $O(n)$ messages.
 With competing proposers, we expect much higher variance and occasional runs that do not terminate within our step limit.
@@ -111,7 +110,7 @@ With competing proposers, we expect much higher variance and occasional runs tha
     [Two leaders possible?], [Yes, if timeouts are wrong], [Not in the same term], [No (one value chosen)],
     [Guaranteed to finish?], [Yes, under synchrony], [No; randomness makes it likely], [No; can livelock],
     [Messages per election], [$Theta(n^2)$ at start-up], [$O(n)$ per term], [$O(n)$ per round],
-    [Predicted time (no failures)], [$6d$], [$approx a + (b-a)\/(n+1) + 3d$], [$approx T + 5d$],
+    [Predicted time (no failures)], [$6d$], [$~ a + (b-a)\/(n+1) + 3d$], [$~ T + 5d$],
   ),
   caption: [Summary of the three algorithms for $n$ fully connected nodes with one-way latency $d$.],
 ) <tab-comparison>
