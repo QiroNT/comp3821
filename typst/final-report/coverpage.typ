@@ -8,7 +8,8 @@
       #text(size: 24pt, hyphenate: false, title)\
     ]
     #v(1em)
-    *Final Report*
+    *Final Report*\
+    Group 44
     #v(2em)
     #for (zid, name) in people [
       #name (#zid) \
