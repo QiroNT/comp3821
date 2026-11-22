@@ -2,7 +2,7 @@
 
 = Background <background>
 
-This section introduces the three algorithms we compare, the assumptions each one makes about the network, and what theory predicts about their behaviour in our experiments.
+This section introduces the three algorithms we compared, the necessary assumptions each one makes to ensure correctness, and what we predict about their behaviour in our experiments.
 
 == Leader Election, Consensus and Timing Models
 
