@@ -85,7 +85,7 @@
     )
 
     plot.plot(
-      size: (12, 6),
+      size: (12, 5),
       x-label: [Network size],
       y-label: [Election time (ms)],
 
