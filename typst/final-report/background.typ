@@ -41,7 +41,7 @@ It is important to note that the assumption of synchronicity for Bully means tha
 
 *Predicted Runtime.* We will consider a fully connected network containing $n$ nodes where all connections have fixed latency $d$.
 In the best case, if every node begins an election at once, the highest ID node will call three round-trip requests (`Halt`, `NewCoordinator`, and `Ready`) causing the leader to be decided after $6d$.
-Furthermore, every node sends `AreYouThere` to all higher ID nodes during the election, creating $1+2+\dots+n=n\dot\frac{n-1}{2}$ requests, plus an additional $3(n-1)$ requests from the winner, all of which include with a reply.
+Furthermore, every node sends `AreYouThere` to all higher ID nodes during the election, creating $1+2+ ... +n=(n(n+1)) / 2$ requests, plus an additional $3(n-1)$ requests from the winner, all of which include with a reply.
 The message complexity is therefore $Theta(n^2)$.
 Under the full synchronicity model, this means that Bully is required to wait for $Theta(n^2)$ messages before the full election cycle can truly complete, therefore the expected runtime will be quadratic, especially if lower ID nodes perform the `AreYouThere` call earlier. This means the $6d$ runtime is a best case scenario where the highest node begins the election.
 
