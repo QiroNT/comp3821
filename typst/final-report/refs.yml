@@ -125,3 +125,17 @@ leader-election-requirements:
     type: periodical
     title: Lecture Notes in Computer Science
     volume: 1914
+
+raft-github:
+  type: webpage
+  title: The Raft Consensus Algorithm
+  url:
+    value: https://raft.github.io/
+    date: 2026-11-03
+
+raft-interactive:
+  type: webpage
+  title: Raft
+  url:
+    value: https://thesecretlivesofdata.com/raft/#election
+    date: 2026-11-03

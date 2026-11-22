@@ -24,6 +24,7 @@
 #include "./final-report/code.typ"
 #include "./final-report/method.typ"
 #include "final-report/results.typ"
+#include "final-report/discussion.typ"
 #include "./final-report/conclusion.typ"
 
 #pagebreak()
