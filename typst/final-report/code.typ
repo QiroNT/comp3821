@@ -6,7 +6,7 @@
 }
 
 = Code <code>
-All code can be found here: #link("https://github.com/QiroNT/comp3821/tree/main/packages")
+All code can be found at #link("https://github.com/QiroNT/comp3821/tree/main/packages").
 Additionally, complete extracts the implementation for each algorithm can be found in @appendix.
 We recommend having the codebase, or the appendix open while reading this section.
 == Framework Description
