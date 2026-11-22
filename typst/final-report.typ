@@ -26,13 +26,13 @@
 #include "final-report/results.typ"
 #include "./final-report/conclusion.typ"
 
+#pagebreak()
 #include "./final-report/acknowledgements.typ"
 
 #if show_demos [
   #include "./final-report/demos.typ"
 ]
 
-#pagebreak()
 #show bibliography: it => if show_references { it } else { place(hide(it)) }
 #bibliography(
   ("./final-report/refs.yml", "./final-report/refs.bib"),
