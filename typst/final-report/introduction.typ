@@ -1,5 +1,5 @@
 = Introduction
-A distributed system is a collection of nodes (independent computers) that coordinate by passing messages over a network. Many such systems rely on a leader node to distribute work and act as a source of truth. If the leader fails the remaining nodes will need to elect a new one, and the speed of this election directly affects availability. This could also apply to small ad-hoc gaming networks where losing the host should not end the session. Hence, we empirically compare the speed of the Bully, Paxos and Raft leader election algorithms on a complete network under a variety of latency profiles.
+A distributed system is a collection of nodes (independent computers) that coordinate by passing messages over a network. Many such systems rely on a leader node to distribute work and act as a source of truth. If the leader fails the remaining nodes will need to elect a new one, and the speed of this election directly affects availability. This could also apply to small ad-hoc gaming networks where losing the host should not end the session. Hence, we experimentally compare the speed of the Bully, Paxos and Raft leader election algorithms on a complete network under a variety of latency profiles.
 
 == Communication Model
 
