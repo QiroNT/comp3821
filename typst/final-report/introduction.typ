@@ -8,20 +8,7 @@
 // peer to peer network, where there is no pre-established leader. Nodes in the network are limited to sending messages to
 // neighboring connected nodes, and are only aware of their neighbors at the start.
 
-Much of the internet is composed of distributed systems. 
-Large companies like Netflix, Google, Amazon, Meta run content distribution networks (CDNs) to serve data to clients faster. 
-Internally, businesses may manage a database with additional redundant databases that must be kept up to date. 
-Implementations of cloud computing may choose to create an orchestrator that organises batch processes for parallel processing.
-A common paradigm used to manage such systems involves selecting a leader that all nodes defer to as a source of truth or orchestrator.
-The widespread nature of distributed systems and use of leader election algorithms demand an empirical evaluation of their speed both in real world scenarios and ideal networks.
-
-Another motivation for analysing leader election algorithms is to investigate their feasibility in smaller scale networks, such as ad-hoc gaming connections.
-For example, basic Minecraft local multiplayer involves setting a computer as host and all other computers join as clients.
-However, if a drink were to spill on the host laptop, it may disconnect from the network and crash the game.
-Implementing a leader election algorithm could allow a connected network of players to recover a game state and choose a new host with minimal disruption to their experience.
-Thus as a minor motivation we wish to explore the ease of implementation and speed of various leader election algorithms in order to determine their feasibility of their inclusion in video games.
-
-To do so, we will evaluate the speed of the Bully, Paxos and Raft leader election algorithms on a complete network and various latency profiles to evaluate which elects a leader the fastest.
+A distributed system is a collection of nodes (independent computers) that coordinate by passing messages over a network. Many such systems rely on a leader node to distribute work and act as a source of truth. If the leader fails the remaining nodes will need to elect a new one, and the speed of this election directly affects availability. This also applies to small ad-hoc gaming networks where losing the host should not end the session. Hence, we empirically compare the speed of the Bully, Paxos and Raft leader election algorithms on a complete network under a variety of latency profiles.
 
 == Communication Model
 
