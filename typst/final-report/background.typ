@@ -37,12 +37,13 @@ The paper, and hence our experimentation for Bully, makes the relevant assumptio
 Most crucially, Bully assumes the network is synchronous so the impossibility condition never arises and Bully always runs correctly.
 Under these assumptions Bully is known to satisfy the requirements of a leader election algorithm.
 
-**TODO**: Clean this up, I'm not really sure about the maths, it seems slightly suspect especially the conclusion (now removed, we never expected bully to be fastest)
-*Simple Predicted Runtime.* We will consider a fully connected network containing $n$ nodes where all connections have fixed latency $d$.
-If every node begins an election at once to match our simulator, the highest ID node will use three round-trip requests (`Halt`, `NewCoordinator`, `Ready`) causing the leader to settle after $6d$.
-Furthermore, every node sends `AreYouThere` to all higher ID nodes, generating $n(n-1)\/2$ requests, plus an additional $3(n-1)$ requests from the winner, each with a reply.
-The message count is therefore $Theta(n^2)$.
-Our test with $n = 5$ and $d = 1$ matches both predictions: the leader settles at time $6.0$ after $10 + 12 = 22$ requests.
+It is important to note that the assumption of synchronicity for Bully means that the algorithm will be more sensitive to latency changes than the other algorithms being investigated. However, due to partial synchrony being assumed in place of true synchronicity, we guarantee that this impact is minimised as the other algorithms must still communicate over the network.
+
+*Predicted Runtime.* We will consider a fully connected network containing $n$ nodes where all connections have fixed latency $d$.
+In the best case, if every node begins an election at once, the highest ID node will call three round-trip requests (`Halt`, `NewCoordinator`, and `Ready`) causing the leader to be decided after $6d$.
+Furthermore, every node sends `AreYouThere` to all higher ID nodes during the election, creating $1+2+\dots+n=n\dot\frac{n-1}{2}$ requests, plus an additional $3(n-1)$ requests from the winner, all of which include with a reply.
+The message complexity is therefore $Theta(n^2)$.
+Under the full synchronicity model, this means that Bully is required to wait for $Theta(n^2)$ messages before the full election cycle can truly complete, therefore the expected runtime will be quadratic, especially if lower ID nodes perform the `AreYouThere` call earlier. This means the $6d$ runtime is a best case scenario where the highest node begins the election.
 
 == Raft
 
