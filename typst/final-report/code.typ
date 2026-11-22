@@ -58,12 +58,19 @@ The rest of the parameters are the parameters passed in `node.call()`.
 *Appendix Entry: @bully-appendix*
 
 The Bully algorithm presented by #pc[@garcia-bully] was translated in JavaScript almost line for line.
-TODO: Rewrite
-, and our RPCs use the paper's procedure names (`AreYouThere`, `Halt`, `NewCoordinator`, `Ready`).
-Each node has a unique priority (its identifier).
-A node starting an election first asks every higher-priority node whether it is alive.
-If any replies, it defers to it; otherwise it halts every lower-priority node, announces itself as the new coordinator, and distributes the new state with `Ready`.
-The live node with the highest identifier therefore always wins.
+
+Our implementation of Bully starts with performing health checks, both of the coordinator to other nodes using `onCheck`, and vice versa in `onTimeout`.
+If any of these health checks indicate the leader is unhealthy, or there is an active election, any noticing node will trigger an election through `election.call`.
+
+Starting the election phase, the unique ID is the value used to compared nodes to each other for the algorithm's leader determination.
+The first RPC that is done is `areYouThere` to higher ID nodes, where any non-timeout response indicates a higher node exists, and this node should stop.
+From there, the current highest ID node calls `abortOutstanding`, which cancels other requests to and from that node to ensure the election is uninterrupted.
+This node then propogates a request to all lower nodes to do that same.
+Finally, the new coordinator asserts itself through a `callAll` to `newCoordinator`, and informs every node to be healthy through a call to `ready`.
+
+To maintain the synchronous assumption that is required for the Bully algorithm to function fully, all RPC calls are `async` and called with the `await` keyword.
+
+Finally, to ensure correctness, manually built unit tests were created and confirmed to work on our implementation to iron out bugs
 
 == Paxos
 *Appendix Entry: @paxos-appendix*
