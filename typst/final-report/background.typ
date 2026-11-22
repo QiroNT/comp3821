@@ -47,6 +47,7 @@ Under the full synchronicity model, this means that Bully is required to wait fo
 
 == Raft
 
+*TODO:* Rewrite
 Raft @ongaro-raft divides time into numbered *terms*, each beginning with an election.
 Every node starts as a follower.
 If a follower hears nothing from a leader within its *election timeout*, it becomes a candidate, increments its term, votes for itself and requests votes from all other nodes.
@@ -63,8 +64,8 @@ If several followers time out at nearly the same moment, the votes split, nobody
 Raft makes this unlikely by choosing each timeout at random, and the paper's experiments show that even a small range of randomness greatly reduces split votes; the authors suggest $150$--$300$ ms.
 Raft also requires the time to broadcast a message to be much smaller than the election timeout.
 
-**TODO:** Review
-*Predicted cost.*
+*TODO:* Review
+*Predicted Runtime.*
 If timeouts are drawn uniformly from $[a, b]$, the first of $n$ nodes times out after an expected $a + (b - a)\/(n + 1)$.
 Without a split vote, the candidate then needs one round trip to collect votes and one more message for followers to learn the leader, so the election should settle after roughly $a + (b-a)\/(n+1) + 3d$, using $O(n)$ messages.
 This gives a testable trade-off.
@@ -99,18 +100,18 @@ However, introducing other proposers introduces the possibility of additional el
 
 == Comparison
 
+*TODO*: Predicted runtime for Raft needs to be updated
 #figure(
   table(
     columns: 4,
     align: left,
     table.header([], [*Bully*], [*Raft*], [*Paxos*]),
-    [Problem solved], [Leader election], [Consensus on a log], [Consensus on one value],
-    [Timing model], [Synchronous], [Partial synchrony], [Partial synchrony],
-    [Decides by], [Highest identifier], [Majority vote per term], [Majority of acceptors],
-    [Two leaders possible?], [Yes, if timeouts are wrong], [Not in the same term], [No (one value chosen)],
-    [Guaranteed to finish?], [Yes, under synchrony], [No; randomness makes it likely], [No; can livelock],
-    [Messages per election], [$Theta(n^2)$ at start-up], [$O(n)$ per term], [$O(n)$ per round],
-    [Predicted time (no failures)], [$6d$], [$~ a + (b-a)\/(n+1) + 3d$], [$~ T + 5d$],
+    [Intended Problem], [Leader election], [Consensus on a log], [Consensus on one value],
+    [Timing Assumption], [Synchronous], [Partial synchrony], [Partial synchrony],
+    [Decided By], [Highest identifier], [Majority vote], [Majority vote],
+    [Two leaders possible?], [Yes with too high latency], [No], [No],
+    [Message Complexity], [$Theta(n^2)$ from start], [$O(n)$ per term], [$O(n)$ per round],
+    [Predicted Runtime], [$>= 6d$], [$>= a + (b-a)\/(n+1) + 3d$], [$>= 5d$],
   ),
   caption: [Summary of the three algorithms for $n$ fully connected nodes with one-way latency $d$.],
 ) <tab-comparison>
