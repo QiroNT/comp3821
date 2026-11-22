@@ -146,7 +146,7 @@
 }
 
 = Results
-Accross all graphs presented, the scales on both axes are logarithmic.
+Across all graphs presented, the scales on both axes are logarithmic.
 Tabulated data is also available in @tables.
 
 == Lines on a Log-Log Scale
@@ -158,8 +158,8 @@ $log(y)= n log(x)$.
 Now let $t = log(x)$ and $s = log(y)$. 
 We now have $s = n t$. 
 Thus to determine the shape of the curves in our graphs we must analyse the gradient of the lines.
-The relevant slope calculations have been performed in the following sections when descriptions of trendlines occur.
-Altenatively, the tabulated results in @tables can be used to check descriptions provided.
+The relevant slope calculations have been performed in the following sections when descriptions of trend-lines occur.
+Alternatively, the tabulated results in @tables can be used to check descriptions provided.
 
 == Median Election Time
 Under the geographic latency profiles (@fig:p50-default, @fig:p50-all), the Bully algorithm shows a linear trend with much higher median finishing times when compared to the other two algorithms. 
@@ -176,11 +176,11 @@ It should be noted that the raft algorithm has large concentrations of finishing
   caption: [Median election time against network size under the sparse geographic latency profile.],
 ) <fig:p50-all>
 
-For network latency profiles that are uniform (@fig:p50-single) or close to uniform (@fig:p50-single), the median trendline for the bully algorithm remains the same.
-The results betweent the Paxos and Raft algorithms vary at above 640 nodes.
+For network latency profiles that are uniform (@fig:p50-single) or close to uniform (@fig:p50-single), the median trend-line for the bully algorithm remains the same.
+The results between the Paxos and Raft algorithms vary at above 640 nodes.
 Here, the Paxos algorithm dramatically increases in election time whilst the raft algorithm remains at around the same finishing time.
 It also has high concentrations of finishing times above $10^4$ milliseconds for network sizes larger than 160 nodes.
-Both algorithms also show a near constant trendline with the exception of jumps for Paxos after 640 nodes and for raft at 320 nodes.
+Both algorithms also show a near constant trend-line with the exception of jumps for Paxos after 640 nodes and for raft at 320 nodes.
 #figure(
   chart("skewed", median-sql, show-points: true),
   caption: [Median election time against network size under the 95%/5% latency profile.],
@@ -205,7 +205,7 @@ The Paxos algorithm on average finishes the fastest and with a near constant ave
   caption: [Mean election time against network size under the sparse geographic latency profile.],
 ) <fig:avg-all>
 
-Under a 95%/5% latency profile (@fig:avg-skewed), both the Bully and Paxos algorithms follow similar linear trendlines.
+Under a 95%/5% latency profile (@fig:avg-skewed), both the Bully and Paxos algorithms follow similar linear trend-lines.
 However, Paxos performs slightly faster on average.
 The Raft algorithm performs substantially faster than the others at higher network sizes and performs faster on average at network sizes over 480 nodes.
 Both the Raft and Paxos algorithms have higher variance in election time between network sizes when compared to the geographic latency profiles.
@@ -215,7 +215,7 @@ Both the Raft and Paxos algorithms have higher variance in election time between
 ) <fig:avg-skewed>
 
 The average election time for the Paxos algorithm is highest under a uniform latency profile (@fig:avg-single).
-Following that, the Raft algorithm peforms worse than the Bully algorithm for networks sizes between $40$ to $480$.
+Following that, the Raft algorithm performs worse than the Bully algorithm for networks sizes between $40$ to $480$.
 After that interval, it performs better on average and experiences as decrease in average election time.
 #figure(
   chart("single", mean-sql),

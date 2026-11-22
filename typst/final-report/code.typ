@@ -7,7 +7,7 @@
 
 = Code <code>
 All code can be found at #link("https://github.com/QiroNT/comp3821/tree/main/packages").
-Additionally, complete extracts the implementation for each algorithm can be found in @appendix.
+Additionally, complete extracts of the implementation for each algorithm can be found in @appendix.
 We recommend having the codebase, or the appendix open while reading this section.
 == Framework Description
 
@@ -65,7 +65,7 @@ If any of these health checks indicate the leader is unhealthy, or there is an a
 Starting the election phase, the unique ID is the value used to compared nodes to each other for the algorithm's leader determination.
 The first RPC that is done is `areYouThere` to higher ID nodes, where any non-timeout response indicates a higher node exists, and this node should stop.
 From there, the current highest ID node calls `abortOutstanding`, which cancels other requests to and from that node to ensure the election is uninterrupted.
-This node then propogates a request to all lower nodes to do that same.
+This node then propagates a request to all lower nodes to do that same.
 Finally, the new coordinator asserts itself through a `callAll` to `newCoordinator`, and informs every node to be healthy through a call to `ready`.
 
 To maintain the synchronous assumption that is required for the Bully algorithm to function fully, all RPC calls are `async` and called with the `await` keyword.
@@ -75,7 +75,7 @@ Finally, to ensure correctness, manually built unit tests were created and confi
 == Paxos
 *Appendix Entry: @paxos-appendix*
 
-We adapted the pseudocode described by #pc[@roohitavaf-paxos] for our implementation of the Paxos algorithm, opting to perform concensus on the proposer's ID to perform leader election.
+We adapted the pseudocode described by #pc[@roohitavaf-paxos] for our implementation of the Paxos algorithm, opting to perform consensus on the proposer's ID to perform leader election.
 
 Unlike the code above, node roles are not separated into separate classes, rather the state is globally accessible through a node's `proposer`, `acceptor`, and `learner` fields which are generated on start-up.
 Each of these fields uses a described matching class to allow for type-safety, and each role's function implementations only access their respective fields.
@@ -99,7 +99,7 @@ Similar to Bully, unit tests were created to validate the algorithm was translat
 == Raft
 *Appendix Entry: @raft-appendix*
 
-Since the Raft algorithm involves a leader election as the core part of reaching concensus, we focus on that stage for the implementation and testing of the algorithm.
+Since the Raft algorithm involves a leader election as the core part of reaching consensus, we focus on that stage for the implementation and testing of the algorithm.
 This means that we have not implemented anything from the log replication stage.
 
 The most important functions for leader election in the Raft algorithm are `requestVote()`, `onTimeout()` and `appendEntry()`

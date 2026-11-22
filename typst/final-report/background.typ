@@ -6,7 +6,7 @@ This section introduces the three algorithms we compared, the necessary assumpti
 
 == Leader Election, Consensus and Timing Models
 
-Leader Election algorithsm aim to solve the problem in distributed computing of deciding which node should act as a coordinator for others.
+Leader Election algorithms aim to solve the problem in distributed computing of deciding which node should act as a coordinator for others.
 There are 3 main requirements that an algorithm must fulfil to validly elect a leader #pc[@leader-election-requirements].
 These are uniqueness, that only one healthy process considered leader, agreement, that all nodes agree that node is leader, and scale, essentially that the algorithm terminates. 
 
@@ -50,10 +50,10 @@ Under the full synchronicity model, this means that Bully is required to wait fo
 The Raft Algorithms @ongaro-raft is a log-replicating consensus algorithm that acts using variable-length numbered terms which increment every time a new election is called.
 Every node, other than the leader, starts as a follower, which constantly receives heartbeat updates from the leader.
 Each time this happens, the follower resets an internal timer called the election timeout, which is a randomised number typically on the scale of a few hundred milliseconds.
-When a follower recieves no heartbeat from the leader within its election timeout, it becomes a candidate, increments its copy of the term, votes for itself and requests votes from all other nodes.
+When a follower receives no heartbeat from the leader within its election timeout, it becomes a candidate, increments its copy of the term, votes for itself and requests votes from all other nodes.
 Each node is allowed to grant at most one vote per term and cannot change its vote once cast that term, and when voting, updates its term to that of the candidate it is voting for.
 If another candidate with a higher term value stands for election, each voter updates its term and is granted a new vote in the new term.
-Once a candidate receives a majorty vote, it becomes leader and immediately begins sending heartbeats.
+Once a candidate receives a majority vote, it becomes leader and immediately begins sending heartbeats.
 
 Raft guarantees that only one node can become leader, since no two candidates in the same term can acquire a majority without pushing the other below the threshold.
 Unlike Bully, this guarantee is timing-independent.
@@ -67,7 +67,7 @@ don't use the replication system, this aspect is safely ignored.
 *Random Timeout.*
 It is possible that several followers time out at around the same time, causing votes to be split between multiple candidates.
 In this case, no candidate wins, and a new term is eventually started by a voter.
-However, to prevent livelock, Raft chooses timeouts randomly.
+However, to prevent live-lock, Raft chooses timeouts randomly.
 The original paper's experiments show a small range between $150$ to $300$ ms greatly reduces split votes.
 This, however, requires latency between nodes to be lower than the timeout duration, as being greater could lead nodes to fail to see the leader after a successful election.
 

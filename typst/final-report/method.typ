@@ -8,7 +8,7 @@ The network latency profiles we tested were uniform, geographic and randomly dis
 Uniform network latency was simulated by setting the same latency for all links in our network.
 The geographic network latency profile mimics latency profiles that exist in the real world by pulling data from Amazon Web Services (AWS).
 For example, between Australia and South Korea, there might be a couple hundred milliseconds of delay whilst within Australia itself, network latencies may only be tens of milliseconds.
-These profiles have also been furhter divided into normal and sparse geographic latency profiles.
+These profiles have also been further divided into normal and sparse geographic latency profiles.
 A normal geographic profile contains all link data that are `ENABLED BY_DEFAULT` in the source data, whilst the sparse latency profile includes all data provided by AWS.
 Thus these profiles help evaluate the real-world effectiveness of algorithms on distributed systems.
 Finally, we tested on a 95%/5% split of fast and slow links, with the slow links being 100 times slower than the fast ones. These varied speeds were then randomly distributed across the network.
