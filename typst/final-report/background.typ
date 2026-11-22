@@ -16,14 +16,14 @@ We modify Raft and Paxos such that the value upon consensus is reaches is the id
 In later sections we outline the specific implementation decisions made that convert each consensus algorithm to leader election.
 
 The algorithms also differ in what their assumptions about timing across the network. We define the terms we use to describe each assumptions as follows:
-- **Synchronous**: Every network message will arrive within a known bound of time, allowing a missing or timed-out reply to guarantee that recipient node has crashed.
-- **Asynchronous**: Conversely, that there is no such bound, so a slow node cannot be distinguished from a crashed one.
+- *Synchronous*: Every network message will arrive within a known bound of time, allowing a missing or timed-out reply to guarantee that recipient node has crashed.
+- *Asynchronous*: Conversely, that there is no such bound, so a slow node cannot be distinguished from a crashed one.
 #pc[@flp-impossibility] proved that no deterministic algorithm can guarantee consensus in an asynchronous system if even one node crashes.
 
-**TODO**: This sentence isn't done.
-While Raft and Paxos never violate agreement in asynchronous systems and only rely on the network eventually responding well-behaved to make progress toward consensus, a model called *partial synchrony* @dls-partial-synchrony.
-**TODO**: Also we need to explain what impact this has
-This difference shapes what "speed" means for each algorithm, and is why we expect them to respond differently to high or variable latency.
+While Raft and Paxos never violate agreement in asynchronous systems and only rely on the network eventually responding to make progress toward consensus, a model called partial synchrony @dls-partial-synchrony exists that guarantees completion in both.
+Unlike true asynchronicity, which is rare in practice due to the synchronicity of the network through message timeouts and the synchronicity of CPUs, partial synchrony uses these practical gaps to guarantee that consensus algorithms will complete.
+The reason this assumptions allows these algorithms to complete where full asynchronicity would fail is that unlike asynchronicity where messages must be waited for eternally, so Raft and Paxos may be stuck waiting for votes that will never arrive, enforcing that network requests have a maximum time to deliver means all nodes in the process will eventually update their state and continue processing.
+This assumption will have little effect on the results of these algorithms, as by using standard computers, these assumptions are baked into the runtime itself across all environments.
 
 == Bully
 
