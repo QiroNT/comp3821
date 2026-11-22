@@ -73,6 +73,7 @@
 }
 
 = Appendix <appendix>
+Geographic latency data source: #link("https://cloudping.co/")
 == Bully algorithm code <bully-appendix>
 #presentCode("../../packages/bully/src/index.ts")
 == Paxos algorithm code <paxos-appendix>
