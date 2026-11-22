@@ -34,5 +34,5 @@ The following steps were automated using JavaScript:
 + Start the simulation and record the finishing time for the logs
 + Repeat the above 5 move times
 + Repeat the above for all other latency profiles
-+ Repeat the above for all other network sizes [TODO: write the actual discrete size]
++ Repeat the above for all other network sizes
 + Repeat the above for the Paxos and Raft algorithm

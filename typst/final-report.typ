@@ -39,6 +39,7 @@
   ("./final-report/refs.yml", "./final-report/refs.bib"),
   title: "References",
   style: "./lib/harvard-the-university-of-new-south-wales.csl",
+  full: true,
 )
 
 #pagebreak()
