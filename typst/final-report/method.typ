@@ -32,7 +32,7 @@ The following steps were automated using JavaScript:
 + Build a connected network of size 20
 + Set each edge to have the same latency
 + Start the simulation and record the finishing time for the logs
-+ Repeat the above 5 move times
-+ Repeat the above for all other latency profiles
-+ Repeat the above for all other network sizes
++ Repeat the above 200 move times
 + Repeat the above for the Paxos and Raft algorithm
++ Repeat the above for all other network sizes
++ Repeat the above for all other latency profiles
