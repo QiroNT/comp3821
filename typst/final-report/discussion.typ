@@ -13,5 +13,8 @@ As seen in @fig:avg-skewed and @fig:avg-single, the Paxos algorithm suddenly spi
 The manner in which it does so, leaves the Raft algorithm as more favourable on uniform networks as the Raft algorithm only experiences a minor increase in election time in @fig:avg-skewed.
 
 On the other hand, the Paxos algorithm performs marginally faster than the Raft algorithm in geographic latencies.
-This is most likely due to TODO: (i can'tg think of a reason)
+This is most likely due to the Raft algorithm experiencing higher number of collisions across regions.
+When this occurs, clusters of nodes on either side of a high latency link may vote within their respective low latency clusters easily creating a split vote.
+As a result the Raft algorithm could more easily encoutner collisions and increase its election time.
+The Paxos algorithm handles such cases better with its liveness characteristic.
 Thus we suggest that the Paxos algorithm is more suitable for applications spanning large regions, such as from APAC to EU.
