@@ -75,7 +75,6 @@ Raft also restricts votes to candidates whose logs are at least as up to date as
 
 == Paxos
 
-2. Assumptions about it, particularly about the liveliness property
 Paxos is a consensus algorithm that ensures all nodes in a system decide and agree on a singe value #pc[@leslie-paxos].
 Each node in the system holds any of the following three roles at once:
 1. Proposer, where the node tries to become a temporary leader, then proposes a value.
@@ -92,10 +91,10 @@ Paxos is not guaranteed to complete as two proposers can repeatedly issue propos
 Since we assume the partial synchrony model, we guarantee that Paxos will always produce a result.
 However, the runtime should depend heavily on how proposers' timeouts are spread out, as with Raft.
 
-**TODO:** As before
-*Predicted cost.*
-With a single proposer, the election takes two round trips plus one message to inform learners, roughly $T + 5d$ after the first timeout $T$, using $O(n)$ messages.
-With competing proposers, we expect much higher variance and occasional runs that do not terminate within our step limit.
+*Predicted Runtime.*
+We will consider a fully connected network containing $n$ nodes where all connections have fixed latency $d$. If a single node acts as a proposer, the election will take two round-trip requests to every node, along with another one-way message to update learners with the new leader.
+From an election starting to the end, this gives $5d$ time to complete in $O(n)$ messages.
+However, introducing other proposers introduces the possibility of additional election rounds, meaning we expect a high variance and the low risk of tests that do not terminate.
 
 == Comparison
 
