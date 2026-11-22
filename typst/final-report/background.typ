@@ -47,33 +47,36 @@ Under the full synchronicity model, this means that Bully is required to wait fo
 
 == Raft
 
-*TODO:* Rewrite
-Raft @ongaro-raft divides time into numbered *terms*, each beginning with an election.
-Every node starts as a follower.
-If a follower hears nothing from a leader within its *election timeout*, it becomes a candidate, increments its term, votes for itself and requests votes from all other nodes.
-Each node grants at most one vote per term, and a candidate that receives votes from a majority becomes leader and immediately sends heartbeats (`AppendEntries()`).
+The Raft Algorithms @ongaro-raft is a log-replicating consensus algorithm that acts using variable-length numbered terms which increment every time a new election is called.
+Every node, other than the leader, starts as a follower, which constantly receives heartbeat updates from the leader.
+Each time this happens, the follower resets an internal timer called the election timeout, which is a randomised number typically on the scale of a few hundred milliseconds.
+When a follower recieves no heartbeat from the leader within its election timeout, it becomes a candidate, increments its copy of the term, votes for itself and requests votes from all other nodes.
+Each node is allowed to grant at most one vote per term and cannot change its vote once cast that term, and when voting, updates its term to that of the candidate it is voting for.
+If another candidate with a higher term value stands for election, each voter updates its term and is granted a new vote in the new term.
+Once a candidate receives a majorty vote, it becomes leader and immediately begins sending heartbeats.
 
-*Why there is at most one leader per term.*
-Any two majorities of the same set of nodes must share at least one node, and that node votes only once per term.
-So two candidates cannot both collect a majority in the same term.
-Unlike Bully, this guarantee does not depend on timing.
-A leader isolated by a partition may still believe it leads in an older term, but it cannot win votes, and it steps down when it sees a higher term.
+Raft guarantees that only one node can become leader, since no two candidates in the same term can acquire a majority without pushing the other below the threshold.
+Unlike Bully, this guarantee is timing-independent.
+If a leader is isolated by a network partition it will step down once it sees a higher term once the partition is resolved.
 
-*Randomised timeouts.*
-If several followers time out at nearly the same moment, the votes split, nobody wins, and a new term is needed.
-Raft makes this unlikely by choosing each timeout at random, and the paper's experiments show that even a small range of randomness greatly reduces split votes; the authors suggest $150$--$300$ ms.
-Raft also requires the time to broadcast a message to be much smaller than the election timeout.
+We modify Raft to only use the election mechanism, and ignore the log-replication aspect for our experimentation.
+Since Raft is known to be correct, we still know our implementation will be correct.
+Furthermore, while Raft has additional restrictions on votes where a candidate whose log is not up to date with a voter cannot be voted for, since we
+don't use the replication system, this aspect is safely ignored.
 
-*TODO:* Review
+*Random Timeout.*
+It is possible that several followers time out at around the same time, causing votes to be split between multiple candidates.
+In this case, no candidate wins, and a new term is eventually started by a voter.
+However, to prevent livelock, Raft chooses timeouts randomly.
+The original paper's experiments show a small range between $150$ to $300$ ms greatly reduces split votes.
+This, however, requires latency between nodes to be lower than the timeout duration, as being greater could lead nodes to fail to see the leader after a successful election.
+
 *Predicted Runtime.*
-If timeouts are drawn uniformly from $[a, b]$, the first of $n$ nodes times out after an expected $a + (b - a)\/(n + 1)$.
-Without a split vote, the candidate then needs one round trip to collect votes and one more message for followers to learn the leader, so the election should settle after roughly $a + (b-a)\/(n+1) + 3d$, using $O(n)$ messages.
-This gives a testable trade-off.
-As $n$ grows, the first timeout comes sooner, but it becomes more likely that a second node times out within $d$ of the first and splits the vote.
-Similarly, a narrow timeout range speeds up the first timeout but increases split votes.
-
-Note that our project uses only Raft's election mechanism.
-Raft also restricts votes to candidates whose logs are at least as up to date as the voter's; since we replicate no log, this rule has no effect in our setting.
+Consider a fully connected network with $n$ nodes, where each connection has latency $d$.
+In the best case, the vote does not split and the candidate only needs one round trip to request and gather votes, followed by another request for followers to learn the leader.
+Therefore, after the initial timeout, the election should settle after $3d$, using $O(n)$ messages.
+However, as $n$ increases, the risk that another node times out close to the first and splits the vote also increases.
+Therefore, we expect that Raft will have a higher variance of results especially as $n$ grows to larger numbers
 
 == Paxos
 
@@ -100,7 +103,6 @@ However, introducing other proposers introduces the possibility of additional el
 
 == Comparison
 
-*TODO*: Predicted runtime for Raft needs to be updated
 #figure(
   table(
     columns: 4,
@@ -111,7 +113,7 @@ However, introducing other proposers introduces the possibility of additional el
     [Decided By], [Highest identifier], [Majority vote], [Majority vote],
     [Two leaders possible?], [Yes with too high latency], [No], [No],
     [Message Complexity], [$Theta(n^2)$ from start], [$O(n)$ per term], [$O(n)$ per round],
-    [Predicted Runtime], [$>= 6d$], [$>= a + (b-a)\/(n+1) + 3d$], [$>= 5d$],
+    [Predicted Runtime after Timeout], [$>= 6d$], [$>= 3d$], [$>= 5d$],
   ),
   caption: [Summary of the three algorithms for $n$ fully connected nodes with one-way latency $d$.],
 ) <tab-comparison>
