@@ -68,13 +68,26 @@ The live node with the highest identifier therefore always wins.
 == Paxos
 *Appendix Entry: @paxos-appendix*
 
-// TODO: add details about Paxos implementation
-We have adapted the plain English and pseudocode described by #pc[@roohitavaf-paxos] for our concrete implementations.
-Additionally, while Paxos is not specifically designed for leader election, as a consensus algorithm, it can be modified to come to a consensus for a leader.
-TODO: Rewrite
-+ *Prepare / Promise.* A proposer sends `Prepare(n)` to the acceptors. An acceptor that has not promised a higher number promises to ignore proposals numbered below $n$, and replies with the highest-numbered proposal it has already accepted, if any.
-+ *Accept / Accepted.* Once a majority has promised, the proposer sends `Accept(n, v)`. Here $v$ must be the value of the highest-numbered proposal reported in the promises, and the proposer may use its own value only if none was reported. An acceptor accepts unless it has since promised a higher number.
+We adapted the pseudocode described by #pc[@roohitavaf-paxos] for our implementation of the Paxos algorithm, opting to perform concensus on the proposer's ID to perform leader election.
 
+Unlike the code above, node roles are not separated into separate classes, rather the state is globally accessible through a node's `proposer`, `acceptor`, and `learner` fields which are generated on start-up.
+Each of these fields uses a described matching class to allow for type-safety, and each role's function implementations only access their respective fields.
+Every remote call as described in the above article is transformed to use our RPC protocol, whereby the `callAll` method also calls back to the original node, which is crucial in ensuring a proposer also votes on and learns its own value.
+
+When a node detects a timeout through `onTimeout()`, it activates the proposer role, setting its internal state before calling `acceptorPrepare` on all nodes.
+From there, all acceptors either respond with a promise, or a nack if they have seen a greater proposal number.
+Upon receiving a majority of promises, the initial proposer calls for an accept to all acceptors, who then again vote on the value sent, being the ID of the initial promiser.
+Finally, once a majority of nodes accept the value, all nodes are informed of the new leader.
+
+A caveat in our implementation is the usage of a globally shared proposal number.
+For the sake of experimentation and reducing the number of experimental variables, we decided this implementation would be okay as it maintains the requirement that the proposal number be monotonically increasing.
+While this has been implemented by using a single variable which all nodes access, this would not be feasible in reality as the shared value and increments would need to be communicated across nodes.
+An alternative that would work in reality, accounting for latency between nodes communicating, would be to use a proposal number of $n*t+m$,
+where $n$ is the size of the network, $t$ is the shared network time in milliseconds, and $m$ is the index of the node creating a proposal number.
+However, since this algorithm for generating numbers is similarly constant time compared to the globally shared variable, there is no meaningful difference between the two.
+Hence we opted for the simpler solution.
+
+Similar to Bully, unit tests were created to validate the algorithm was translated from pseudocode correctly, with results from the tests matching what we expected.
 
 == Raft
 *Appendix Entry: @raft-appendix*
