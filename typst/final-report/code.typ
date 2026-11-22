@@ -58,23 +58,43 @@ The rest of the parameters are the parameters passed in `node.call()`.
 *Appendix Entry: @bully-appendix*
 
 The Bully algorithm presented by #pc[@garcia-bully] was translated in JavaScript almost line for line.
-TODO: Rewrite
-, and our RPCs use the paper's procedure names (`AreYouThere`, `Halt`, `NewCoordinator`, `Ready`).
-Each node has a unique priority (its identifier).
-A node starting an election first asks every higher-priority node whether it is alive.
-If any replies, it defers to it; otherwise it halts every lower-priority node, announces itself as the new coordinator, and distributes the new state with `Ready`.
-The live node with the highest identifier therefore always wins.
+
+Our implementation of Bully starts with performing health checks, both of the coordinator to other nodes using `onCheck`, and vice versa in `onTimeout`.
+If any of these health checks indicate the leader is unhealthy, or there is an active election, any noticing node will trigger an election through `election.call`.
+
+Starting the election phase, the unique ID is the value used to compared nodes to each other for the algorithm's leader determination.
+The first RPC that is done is `areYouThere` to higher ID nodes, where any non-timeout response indicates a higher node exists, and this node should stop.
+From there, the current highest ID node calls `abortOutstanding`, which cancels other requests to and from that node to ensure the election is uninterrupted.
+This node then propogates a request to all lower nodes to do that same.
+Finally, the new coordinator asserts itself through a `callAll` to `newCoordinator`, and informs every node to be healthy through a call to `ready`.
+
+To maintain the synchronous assumption that is required for the Bully algorithm to function fully, all RPC calls are `async` and called with the `await` keyword.
+
+Finally, to ensure correctness, manually built unit tests were created and confirmed to work on our implementation to iron out bugs
 
 == Paxos
 *Appendix Entry: @paxos-appendix*
 
-// TODO: add details about Paxos implementation
-We have adapted the plain English and pseudocode described by #pc[@roohitavaf-paxos] for our concrete implementations.
-Additionally, while Paxos is not specifically designed for leader election, as a consensus algorithm, it can be modified to come to a consensus for a leader.
-TODO: Rewrite
-+ *Prepare / Promise.* A proposer sends `Prepare(n)` to the acceptors. An acceptor that has not promised a higher number promises to ignore proposals numbered below $n$, and replies with the highest-numbered proposal it has already accepted, if any.
-+ *Accept / Accepted.* Once a majority has promised, the proposer sends `Accept(n, v)`. Here $v$ must be the value of the highest-numbered proposal reported in the promises, and the proposer may use its own value only if none was reported. An acceptor accepts unless it has since promised a higher number.
+We adapted the pseudocode described by #pc[@roohitavaf-paxos] for our implementation of the Paxos algorithm, opting to perform concensus on the proposer's ID to perform leader election.
 
+Unlike the code above, node roles are not separated into separate classes, rather the state is globally accessible through a node's `proposer`, `acceptor`, and `learner` fields which are generated on start-up.
+Each of these fields uses a described matching class to allow for type-safety, and each role's function implementations only access their respective fields.
+Every remote call as described in the above article is transformed to use our RPC protocol, whereby the `callAll` method also calls back to the original node, which is crucial in ensuring a proposer also votes on and learns its own value.
+
+When a node detects a timeout through `onTimeout()`, it activates the proposer role, setting its internal state before calling `acceptorPrepare` on all nodes.
+From there, all acceptors either respond with a promise, or a nack if they have seen a greater proposal number.
+Upon receiving a majority of promises, the initial proposer calls for an accept to all acceptors, who then again vote on the value sent, being the ID of the initial promiser.
+Finally, once a majority of nodes accept the value, all nodes are informed of the new leader.
+
+A caveat in our implementation is the usage of a globally shared proposal number.
+For the sake of experimentation and reducing the number of experimental variables, we decided this implementation would be okay as it maintains the requirement that the proposal number be monotonically increasing.
+While this has been implemented by using a single variable which all nodes access, this would not be feasible in reality as the shared value and increments would need to be communicated across nodes.
+An alternative that would work in reality, accounting for latency between nodes communicating, would be to use a proposal number of $n*t+m$,
+where $n$ is the size of the network, $t$ is the shared network time in milliseconds, and $m$ is the index of the node creating a proposal number.
+However, since this algorithm for generating numbers is similarly constant time compared to the globally shared variable, there is no meaningful difference between the two.
+Hence we opted for the simpler solution.
+
+Similar to Bully, unit tests were created to validate the algorithm was translated from pseudocode correctly, with results from the tests matching what we expected.
 
 == Raft
 *Appendix Entry: @raft-appendix*

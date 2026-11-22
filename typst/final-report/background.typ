@@ -2,7 +2,7 @@
 
 = Background <background>
 
-This section introduces the three algorithms we compare, the assumptions each one makes about the network, and what theory predicts about their behaviour in our experiments.
+This section introduces the three algorithms we compared, the necessary assumptions each one makes to ensure correctness, and what we predict about their behaviour in our experiments.
 
 == Leader Election, Consensus and Timing Models
 
@@ -16,14 +16,14 @@ We modify Raft and Paxos such that the value upon consensus is reaches is the id
 In later sections we outline the specific implementation decisions made that convert each consensus algorithm to leader election.
 
 The algorithms also differ in what their assumptions about timing across the network. We define the terms we use to describe each assumptions as follows:
-- **Synchronous**: Every network message will arrive within a known bound of time, allowing a missing or timed-out reply to guarantee that recipient node has crashed.
-- **Asynchronous**: Conversely, that there is no such bound, so a slow node cannot be distinguished from a crashed one.
+- *Synchronous*: Every network message will arrive within a known bound of time, allowing a missing or timed-out reply to guarantee that recipient node has crashed.
+- *Asynchronous*: Conversely, that there is no such bound, so a slow node cannot be distinguished from a crashed one.
 #pc[@flp-impossibility] proved that no deterministic algorithm can guarantee consensus in an asynchronous system if even one node crashes.
 
-**TODO**: This sentence isn't done.
-While Raft and Paxos never violate agreement in asynchronous systems and only rely on the network eventually responding well-behaved to make progress toward consensus, a model called *partial synchrony* @dls-partial-synchrony.
-**TODO**: Also we need to explain what impact this has
-This difference shapes what "speed" means for each algorithm, and is why we expect them to respond differently to high or variable latency.
+While Raft and Paxos never violate agreement in asynchronous systems and only rely on the network eventually responding to make progress toward consensus, a model called partial synchrony @dls-partial-synchrony exists that guarantees completion in both.
+Unlike true asynchronicity, which is rare in practice due to the synchronicity of the network through message timeouts and the synchronicity of CPUs, partial synchrony uses these practical gaps to guarantee that consensus algorithms will complete.
+The reason this assumptions allows these algorithms to complete where full asynchronicity would fail is that unlike asynchronicity where messages must be waited for eternally, so Raft and Paxos may be stuck waiting for votes that will never arrive, enforcing that network requests have a maximum time to deliver means all nodes in the process will eventually update their state and continue processing.
+This assumption will have little effect on the results of these algorithms, as by using standard computers, these assumptions are baked into the runtime itself across all environments.
 
 == Bully
 
@@ -37,15 +37,17 @@ The paper, and hence our experimentation for Bully, makes the relevant assumptio
 Most crucially, Bully assumes the network is synchronous so the impossibility condition never arises and Bully always runs correctly.
 Under these assumptions Bully is known to satisfy the requirements of a leader election algorithm.
 
-**TODO**: Clean this up, I'm not really sure about the maths, it seems slightly suspect especially the conclusion (now removed, we never expected bully to be fastest)
-*Simple Predicted Runtime.* We will consider a fully connected network containing $n$ nodes where all connections have fixed latency $d$.
-If every node begins an election at once to match our simulator, the highest ID node will use three round-trip requests (`Halt`, `NewCoordinator`, `Ready`) causing the leader to settle after $6d$.
-Furthermore, every node sends `AreYouThere` to all higher ID nodes, generating $n(n-1)\/2$ requests, plus an additional $3(n-1)$ requests from the winner, each with a reply.
-The message count is therefore $Theta(n^2)$.
-Our test with $n = 5$ and $d = 1$ matches both predictions: the leader settles at time $6.0$ after $10 + 12 = 22$ requests.
+It is important to note that the assumption of synchronicity for Bully means that the algorithm will be more sensitive to latency changes than the other algorithms being investigated. However, due to partial synchrony being assumed in place of true synchronicity, we guarantee that this impact is minimised as the other algorithms must still communicate over the network.
+
+*Predicted Runtime.* We will consider a fully connected network containing $n$ nodes where all connections have fixed latency $d$.
+In the best case, if every node begins an election at once, the highest ID node will call three round-trip requests (`Halt`, `NewCoordinator`, and `Ready`) causing the leader to be decided after $6d$.
+Furthermore, every node sends `AreYouThere` to all higher ID nodes during the election, creating $1+2+ ... +n=(n(n+1)) / 2$ requests, plus an additional $3(n-1)$ requests from the winner, all of which include with a reply.
+The message complexity is therefore $Theta(n^2)$.
+Under the full synchronicity model, this means that Bully is required to wait for $Theta(n^2)$ messages before the full election cycle can truly complete, therefore the expected runtime will be quadratic, especially if lower ID nodes perform the `AreYouThere` call earlier. This means the $6d$ runtime is a best case scenario where the highest node begins the election.
 
 == Raft
 
+*TODO:* Rewrite
 Raft @ongaro-raft divides time into numbered *terms*, each beginning with an election.
 Every node starts as a follower.
 If a follower hears nothing from a leader within its *election timeout*, it becomes a candidate, increments its term, votes for itself and requests votes from all other nodes.
@@ -62,8 +64,8 @@ If several followers time out at nearly the same moment, the votes split, nobody
 Raft makes this unlikely by choosing each timeout at random, and the paper's experiments show that even a small range of randomness greatly reduces split votes; the authors suggest $150$--$300$ ms.
 Raft also requires the time to broadcast a message to be much smaller than the election timeout.
 
-**TODO:** Review
-*Predicted cost.*
+*TODO:* Review
+*Predicted Runtime.*
 If timeouts are drawn uniformly from $[a, b]$, the first of $n$ nodes times out after an expected $a + (b - a)\/(n + 1)$.
 Without a split vote, the candidate then needs one round trip to collect votes and one more message for followers to learn the leader, so the election should settle after roughly $a + (b-a)\/(n+1) + 3d$, using $O(n)$ messages.
 This gives a testable trade-off.
@@ -75,7 +77,6 @@ Raft also restricts votes to candidates whose logs are at least as up to date as
 
 == Paxos
 
-2. Assumptions about it, particularly about the liveliness property
 Paxos is a consensus algorithm that ensures all nodes in a system decide and agree on a singe value #pc[@leslie-paxos].
 Each node in the system holds any of the following three roles at once:
 1. Proposer, where the node tries to become a temporary leader, then proposes a value.
@@ -92,25 +93,25 @@ Paxos is not guaranteed to complete as two proposers can repeatedly issue propos
 Since we assume the partial synchrony model, we guarantee that Paxos will always produce a result.
 However, the runtime should depend heavily on how proposers' timeouts are spread out, as with Raft.
 
-**TODO:** As before
-*Predicted cost.*
-With a single proposer, the election takes two round trips plus one message to inform learners, roughly $T + 5d$ after the first timeout $T$, using $O(n)$ messages.
-With competing proposers, we expect much higher variance and occasional runs that do not terminate within our step limit.
+*Predicted Runtime.*
+We will consider a fully connected network containing $n$ nodes where all connections have fixed latency $d$. If a single node acts as a proposer, the election will take two round-trip requests to every node, along with another one-way message to update learners with the new leader.
+From an election starting to the end, this gives $5d$ time to complete in $O(n)$ messages.
+However, introducing other proposers introduces the possibility of additional election rounds, meaning we expect a high variance and the low risk of tests that do not terminate.
 
 == Comparison
 
+*TODO*: Predicted runtime for Raft needs to be updated
 #figure(
   table(
     columns: 4,
     align: left,
     table.header([], [*Bully*], [*Raft*], [*Paxos*]),
-    [Problem solved], [Leader election], [Consensus on a log], [Consensus on one value],
-    [Timing model], [Synchronous], [Partial synchrony], [Partial synchrony],
-    [Decides by], [Highest identifier], [Majority vote per term], [Majority of acceptors],
-    [Two leaders possible?], [Yes, if timeouts are wrong], [Not in the same term], [No (one value chosen)],
-    [Guaranteed to finish?], [Yes, under synchrony], [No; randomness makes it likely], [No; can livelock],
-    [Messages per election], [$Theta(n^2)$ at start-up], [$O(n)$ per term], [$O(n)$ per round],
-    [Predicted time (no failures)], [$6d$], [$~ a + (b-a)\/(n+1) + 3d$], [$~ T + 5d$],
+    [Intended Problem], [Leader election], [Consensus on a log], [Consensus on one value],
+    [Timing Assumption], [Synchronous], [Partial synchrony], [Partial synchrony],
+    [Decided By], [Highest identifier], [Majority vote], [Majority vote],
+    [Two leaders possible?], [Yes with too high latency], [No], [No],
+    [Message Complexity], [$Theta(n^2)$ from start], [$O(n)$ per term], [$O(n)$ per round],
+    [Predicted Runtime], [$>= 6d$], [$>= a + (b-a)\/(n+1) + 3d$], [$>= 5d$],
   ),
   caption: [Summary of the three algorithms for $n$ fully connected nodes with one-way latency $d$.],
 ) <tab-comparison>
