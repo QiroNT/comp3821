@@ -111,9 +111,9 @@ However, introducing other proposers introduces the possibility of additional el
     [Intended Problem], [Leader election], [Consensus on a log], [Consensus on one value],
     [Timing Assumption], [Synchronous], [Partial synchrony], [Partial synchrony],
     [Decided By], [Highest identifier], [Majority vote], [Majority vote],
-    [Two leaders possible?], [Yes with too high latency], [No], [No],
+    [Two leaders possible?], [Yes with high latency], [No], [No],
     [Message Complexity], [$Theta(n^2)$ from start], [$O(n)$ per term], [$O(n)$ per round],
-    [Predicted Runtime after Timeout], [$>= 6d$], [$>= 3d$], [$>= 5d$],
+    [Predicted Runtime], [$>= 6d$], [$>= 3d$], [$>= 5d$],
   ),
   caption: [Summary of the three algorithms for $n$ fully connected nodes with one-way latency $d$.],
 ) <tab-comparison>
